@@ -50,9 +50,34 @@ class FeatureData():
         self.__mean_feature()
         self.__std_feature()
 
+    def get_data_dict(self):
+        return({
+            "name": self.name,
+            "count": self.count,
+            "mean": self.mean,
+            "std": self.std,
+            "min": self.min,
+            "25%": self.per25,
+            "50%": self.per50,
+            "75%": self.per75,
+            "max": self.max
+        })
+        
+    def get_data_list(self):
+        return([
+            self.name,
+            self.count,
+            self.mean,
+            self.std,
+            self.min,
+            self.per25,
+            self.per50,
+            self.per75,
+            self.max
+        ])
+
     def __sort_feature(self):
         self.feature = self.feature.sort_values()
-        print(self.feature)
     
     def __clean_empty_feature(self):
         self.feature = self.feature.dropna()
@@ -75,7 +100,7 @@ class FeatureData():
         variance = sum(deviations) / (self.count - 1)
         #self.std = math.sqrt(variance)
         self.std = variance ** 0.5
-        print(self.std)
+        #print(self.std)
     
     def __mean_feature(self):
         self.mean = self.feature.sum() / self.count
@@ -155,8 +180,14 @@ df = pandas.read_csv("./dataset_train.csv")
 #describe(dataframe)
 filtered_df = filter_dataframe(df)
 #test = FeatureData(df["Flying"])
+lst = [[]]
 for feature in filtered_df:
-    test = FeatureData(filtered_df[feature])
-print(df.describe())
+    lst[feature].append(FeatureData(filtered_df[feature]).get_data_list())
+for i in range(len(lst)):
+    print(lst[i], end="\t")
+#for i in range(len(lst)):
+    #print(lst[i].min, end="\t")
+#    print("{:.5f}".format(lst[i].min), end="\t")
+#print(df.describe())
 #test.__sort_feature()
 #test.__clean_empty_feature()

@@ -85,6 +85,7 @@ class FeatureData():
     def __count_feature(self):
         for row in self.feature:
             self.count += 1
+        self.count = float(self.count)
     
     def __min_feature(self):
         self.min = self.feature[0]
@@ -175,16 +176,34 @@ def describe(dataframe):
         #calculation_count(sorted_column[column])
         #calculation_count(sorted_columns[column_name])
 
-
 df = pandas.read_csv("./dataset_train.csv")
 #describe(dataframe)
 filtered_df = filter_dataframe(df)
 #test = FeatureData(df["Flying"])
-lst = [[]]
+lst = []
+lst.append([
+            "name",
+            "count",
+            "mean",
+            "std",
+            "min",
+            "25%",
+            "50%",
+            "75%",
+            "max"
+            ])
+
 for feature in filtered_df:
-    lst[feature].append(FeatureData(filtered_df[feature]).get_data_list())
-for i in range(len(lst)):
-    print(lst[i], end="\t")
+    lst.append(FeatureData(filtered_df[feature]).get_data_list())
+for indexes,ft1,ft2,ft3,ft4,ft5,ft6,ft7,ft8,ft9,ft10,ft11,ft12,ft13 in zip(*lst):
+    #print("{:.5f}".format(i1), end="\t")
+    #print("{:.5f}".format(i2), end="\t")
+    if (type(ft1) == str):
+        print("{:<5}{:>14.10}{:>14.10}{:>14.10}{:>14.10}{:>14.10}{:>14.10}{:>14.10}{:>14.10}{:>14.10}{:>14.10}{:>14.10}{:>14.10}{:>14.10}".format("",ft1, ft2, ft3, ft4, ft5, ft6, ft7, ft8, ft9, ft10, ft11, ft12, ft13))
+    else:
+        #print("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(indexes, ft1, ft2, ft3, ft4, ft5, ft6, ft7, ft8, ft9, ft10, ft11, ft12, ft13), end="\t")
+        print("{:<5}{:>14.5f}{:>14.5f}{:>14.5f}{:>14.5f}{:>14.5f}{:>14.5f}{:>14.5f}{:>14.5f}{:>14.5f}{:>14.5f}{:>14.5f}{:>14.5f}{:>14.5f}".format(indexes, ft1, ft2, ft3, ft4, ft5, ft6, ft7, ft8, ft9, ft10, ft11, ft12, ft13))
+
 #for i in range(len(lst)):
     #print(lst[i].min, end="\t")
 #    print("{:.5f}".format(lst[i].min), end="\t")

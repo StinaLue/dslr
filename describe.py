@@ -99,9 +99,7 @@ class FeatureData():
         """
         deviations = [(x - self.mean) ** 2 for x in self.feature]
         variance = sum(deviations) / (self.count - 1)
-        #self.std = math.sqrt(variance)
         self.std = variance ** 0.5
-        #print(self.std)
     
     def __mean_feature(self):
         self.mean = self.feature.sum() / self.count
@@ -150,36 +148,21 @@ class FeatureData():
             d0 = self.feature.values[int(f)] * (c - index)
             d1 = self.feature.values[int(c)] * (index - f)
             self.per75 = d0 + d1
-
-    def __print_describe(self):
-        for i in range(len(data)):
-            if i == 0:
-                print('{:<10s}{:>4s}{:>12s}{:>12s}'.format(data[i][0],data[i][1],data[i][2],data[i][3]))
-            else:
-                print('{:<10s}{:>4d}{:^12s}{:>12.1f}'.format(data[i][0],data[i][1],data[i][2],data[i][3]))
     
 def filter_dataframe(dataframe):
     numerics = ['int16', 'int32', 'int64', 'float16', 'float32', 'float64']
     filtered_dataframe = dataframe.select_dtypes(include=numerics)
     filtered_dataframe.pop("Index")
-    #print(filtered_dataframe)
     return (filtered_dataframe)
 
 def describe(dataframe):
-    #print(dataframe.describe())
     filtered_dataframe = filter_dataframe(dataframe)
     sorted_columns = []
-    #for column in filtered_dataframe:
     for column_name in filtered_dataframe:
-       # sorted_column = filtered_dataframe.sort_values(column)
         sorted_columns.append(filtered_dataframe[column_name].sort_values())
-        #calculation_count(sorted_column[column])
-        #calculation_count(sorted_columns[column_name])
 
 df = pandas.read_csv("./dataset_train.csv")
-#describe(dataframe)
 filtered_df = filter_dataframe(df)
-#test = FeatureData(df["Flying"])
 lst = []
 lst.append([
             "name",
@@ -196,12 +179,9 @@ lst.append([
 for feature in filtered_df:
     lst.append(FeatureData(filtered_df[feature]).get_data_list())
 for indexes,ft1,ft2,ft3,ft4,ft5,ft6,ft7,ft8,ft9,ft10,ft11,ft12,ft13 in zip(*lst):
-    #print("{:.5f}".format(i1), end="\t")
-    #print("{:.5f}".format(i2), end="\t")
     if (type(ft1) == str):
         print("{:<5}{:>14.10}{:>14.10}{:>14.10}{:>14.10}{:>14.10}{:>14.10}{:>14.10}{:>14.10}{:>14.10}{:>14.10}{:>14.10}{:>14.10}{:>14.10}".format("",ft1, ft2, ft3, ft4, ft5, ft6, ft7, ft8, ft9, ft10, ft11, ft12, ft13))
     else:
-        #print("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(indexes, ft1, ft2, ft3, ft4, ft5, ft6, ft7, ft8, ft9, ft10, ft11, ft12, ft13), end="\t")
         print("{:<5}{:>14.5f}{:>14.5f}{:>14.5f}{:>14.5f}{:>14.5f}{:>14.5f}{:>14.5f}{:>14.5f}{:>14.5f}{:>14.5f}{:>14.5f}{:>14.5f}{:>14.5f}".format(indexes, ft1, ft2, ft3, ft4, ft5, ft6, ft7, ft8, ft9, ft10, ft11, ft12, ft13))
 
 #for i in range(len(lst)):

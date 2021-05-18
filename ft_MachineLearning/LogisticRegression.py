@@ -43,6 +43,14 @@ class LogisticRegression_Model:
     """
     This class' goal is to run a Logistic regression algorithm training on a user-specified csv file.
     After the training, the Logistic function parameters are stored in the class as theta0 and theta1.
+
+    How it works:
+    1. init all features coeffs and intercept to 0 
+    2. mutiply each feature coeff by its feature to get log-odds (probability)
+    3. scale the log-odds by mapping them to the our logistic function --> the sigmoid function, giving us a probability in the range (0,1)
+    4. calculate the partial derivative of the log-loss of our current logistic function
+    5. use the partial derivative to update our intercept and our features coefficients (gradient descent)
+    6. run the gradient descent until we reach the best minimum (change the learning rate if needed)
     """
     def __init__(self, filename, xfeature=None, yfeature=None, verbose=False):
         """
@@ -53,6 +61,9 @@ class LogisticRegression_Model:
         """
         self.filename = filename
         self.dataframe = self.__read_csv(self.filename)
+
+        self.features_coeffs = np.zeros(NB OF FEATURES)
+        self.intercept = 0
         #self.scaled_dataframe = (self.dataframe - self.dataframe.mean()) / self.dataframe.std()
         #self.nb_entries = float(len(self.dataframe.index))
         #self.__set_features(xfeature, yfeature, self.dataframe)
@@ -68,7 +79,7 @@ class LogisticRegression_Model:
         #self.__write_thetas()
         #self.__plot_result()
 
-    def log_odds(features, coefficients, intercept):
+    def log_odds(self, features, coefficients, intercept):
         """
         features: numpy array holding all features used
         coefficients: numpy array holding the coefficients of each respective feature
@@ -82,7 +93,7 @@ class LogisticRegression_Model:
         """
         return np.dot(features, coefficients) + intercept
 
-    def sigmoid(z):
+    def sigmoid(self, z):
         """
         z: log-odds in a numpy array
 
@@ -96,7 +107,7 @@ class LogisticRegression_Model:
         """
         return 1.0 / (1.0 + np.exp(-z))
     
-    def log_loss(predicted_probabilities, actual_class):
+    def log_loss(self, predicted_probabilities, actual_class):
         """
         Caculate the cost of our current sigmoid function through the log-loss formula where:
         'm': the number of data samples
@@ -112,11 +123,16 @@ class LogisticRegression_Model:
 
         The log loss function is very punitive when the prediction is very far from the correct result (being either 1, or 0)
         """
-        return np.sum(-(1/actual_class.shape[0])*(actual_class*np.log(probabilities) + (1-actual_class)*np.log(1-probabilities)))
+        return np.sum(-(1 / actual_class.shape[0]) * (actual_class * np.log(predicted_probabilities) + (1 - actual_class) * np.log(1 - predicted_probabilities)))
+
+    def predict_class(self, features, coefficients, intercept, threshold):
+        calculated_log_odds = self.log_odds(features,coefficients, intercept)
+        probabilities = self.sigmoid(calculated_log_odds)
+        return (np.where(probabilities >= threshold, 1, 0))
 
     def __logistic_function(self, features, coefficients, intercept):
         log_odds = np.dot(features, coefficients) + intercept
-        results = sigmoid(log_odds)
+        results = self.sigmoid(log_odds)
 
     def __unscale_predictY(self):
         """
@@ -156,7 +172,7 @@ class LogisticRegression_Model:
             exit()
 
 
-    def __train(self):
+    def train(self, features, true_labels, learning_rate):
         """
         runs the Logistic regression algorithm with all the provided class attributes
         """
@@ -164,13 +180,13 @@ class LogisticRegression_Model:
         counter = 0
         for i in range(1000): #stop range if mean_squared_error is 3 x the same etc.
             self.current_scaled_predictY = self.__hypothesis_function(self.scaled_X)
-            #tmpθ0 = ratioDApprentissage ∗ 1/m (m−1∑i=0)(prixEstime(kilométrage[i]) − prix[i])
+            #intercept (tmpθ0) = ratioDApprentissage ∗ 1/m (m−1∑i=0)(predicted_proba(i) - real_class(i))
             theta0_tmp = self.learning_rate * (1/self.nb_entries) * sum(self.current_scaled_predictY - self.scaled_Y)
-            #tmpθ1= ratioDApprentissage ∗ 1/m (m−1∑i=0)(prixEstime(kilométrage[i]) − prix[i]) ∗ kilométrage[i]
+            #features coeffs = ratioDApprentissage ∗ 1/m (m−1∑i=0)(predicted_proba(i) − real_class(i)) ∗ j_feature_value(i)
             theta1_tmp = self.learning_rate * (1/self.nb_entries) * sum((self.current_scaled_predictY - self.scaled_Y) * self.scaled_X)
             self.theta0 = self.theta0 - theta0_tmp
             self.theta1 = self.theta1 - theta1_tmp
-            current_error = self.__mean_squared_error(self.scaled_Y, self.__hypothesis_function(self.scaled_X))
+            current_error = self.log_loss(predicted_probabilities, actual_class)
             if current_error == current_error_tmp:
                 counter += 1
             else:
@@ -242,12 +258,6 @@ class LogisticRegression_Model:
         dataframe = pandas.read_csv(filename)
         return dataframe
 
-    def __hypothesis_function(self, x):
-        """
-        Logistic function defined by the class thetas and a given x.
-        """
-        return self.theta0 + self.theta1 * x
-    
     def predict(self, x):
         """
         prints a y prediction with the trained parameters kept in the class.

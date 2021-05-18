@@ -16,6 +16,7 @@ color_dict = dict({'Hufflepuff':'gold',
                   'Ravenclaw': 'blue',
                   'Gryffindor': 'red'})
 sns.set_theme()
-g = sns.pairplot(df.drop("Index", axis=1), hue="Hogwarts House", palette=color_dict, dropna=True)
+g = sns.pairplot(df.drop("Index", axis=1), hue="Hogwarts House", palette=color_dict, dropna=True)#, plot_kws={"s": 2})
+#g.fig.set_size_inches(1,1))
 g.savefig("pairplot.png")
 plt.show()

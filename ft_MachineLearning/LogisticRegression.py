@@ -52,20 +52,39 @@ class LogisticRegression_Model:
     5. use the partial derivative to update our intercept and our features coefficients (gradient descent)
     6. run the gradient descent until we reach the best minimum (change the learning rate if needed)
     """
-    def __init__(self, filename, xfeature=None, yfeature=None, verbose=False):
+    def __init__(self, dataframe, class_to_test, class_name, features_selected):
         """
         filename: CSV file containing the data
         xfeature: name of the feature for the x axis
         yfeature: name of the feature for the y axis
         verbose: boolean --> plot during training or not
         """
-        self.filename = filename
-        self.dataframe = self.__read_csv(self.filename)
 
-        self.features_coeffs = np.zeros(NB OF FEATURES)
-        self.intercept = 0
-        #self.scaled_dataframe = (self.dataframe - self.dataframe.mean()) / self.dataframe.std()
-        #self.nb_entries = float(len(self.dataframe.index))
+        self.dataframe = dataframe
+        self.scaled_dataframe = (self.dataframe - self.dataframe.mean()) / self.dataframe.std()
+        self.nb_entries = float(len(self.dataframe.index))
+
+        self.features_selected = features_selected
+
+        self.features_coeffs = np.zeros((len(features_selected), 1))
+        self.scaled_features_coeffs = np.zeros((len(features_selected), 1))
+        self.intercept = np.zeros(1)
+        self.scaled_intercept = np.zeros(1)
+        #INT OR FLOAT FOR 0 and 1 ??
+        self.classes = (dataframe[class_name] == class_to_test).astype(int).to_numpy()
+        np.reshape(self.classes, (int(self.nb_entries), 1))
+        self.features = {}
+        for i in range(len(self.features_selected)):
+            self.features[self.features_selected[i]] = self.dataframe[self.features_selected[i]].to_numpy()
+        self.scaled_features = {}
+        for i in range(len(self.features_selected)):
+            self.scaled_features[self.features_selected[i]] = self.scaled_dataframe[self.features_selected[i]].to_numpy()
+
+        self.features_matrix = dataframe[features_selected].to_numpy()
+        self.scaled_features_matrix = self.scaled_dataframe[features_selected].to_numpy()
+
+        self.dict_feat_label = {"Features":self.scaled_features_matrix, "Labels":self.classes}
+
         #self.__set_features(xfeature, yfeature, self.dataframe)
         #self.true_X, self.true_Y = self.__init_XY(self.dataframe, self.features)
         #self.verbose = verbose
@@ -78,6 +97,35 @@ class LogisticRegression_Model:
         #self.__unscale_thetas()
         #self.__write_thetas()
         #self.__plot_result()
+
+    def select_random_matrix_batch(self, features_matrix, batch_size):
+        """
+        features_matrix: numpy 2D array
+        batch_size: number of random rows in the new numpy 2D array
+
+        selects batch_size of random rows inside the 2D numpy array features_matrix
+        returns the 2D numpy array batch
+        Very useful for Stochastic (for batch size == 1) or Batch Gradient Descent
+        """
+        new_random_batch = features_matrix[np.random.choice(features_matrix.shape[0], batch_size, replace=False)]
+        return new_random_batch
+
+    def selrand_features_labels(self, features_matrix, labels_array, batch_size):
+        """
+        features_matrix: numpy 2D array holding features (1 row = 1 data entry with several features)
+        labels = numpy array holding labels
+        batch_size: number of random rows in the new numpy 2D array
+
+        selects batch_size of random rows inside the 2D numpy array features_matrix and labels array
+        returns the labels batch, and the 2D features batch
+        Very useful for Stochastic (for batch size == 1) or Batch Gradient Descent
+        """
+        assert len(features_matrix) == len(labels_array)
+        shuffler = np.random.permutation(len(features_matrix))
+        batch_shuffler = shuffler[:batch_size]
+        labels_batch = labels_array[batch_shuffler]
+        features_batch = features_matrix[batch_shuffler]
+        return labels_batch, features_batch
 
     def log_odds(self, features, coefficients, intercept):
         """
@@ -130,6 +178,11 @@ class LogisticRegression_Model:
         probabilities = self.sigmoid(calculated_log_odds)
         return (np.where(probabilities >= threshold, 1, 0))
 
+    def predict_proba(self, features, coefficients, intercept):
+        calculated_log_odds = self.log_odds(features,coefficients, intercept)
+        probabilities = self.sigmoid(calculated_log_odds)
+        return probabilities
+
     def __logistic_function(self, features, coefficients, intercept):
         log_odds = np.dot(features, coefficients) + intercept
         results = self.sigmoid(log_odds)
@@ -172,16 +225,27 @@ class LogisticRegression_Model:
             exit()
 
 
-    def train(self, features, true_labels, learning_rate):
+    #def train(self, features, true_labels, learning_rate, batch_size):
+    def train(self, features_matrix, labels_array, learning_rate, batch_size, iterations, tolerance):
         """
         runs the Logistic regression algorithm with all the provided class attributes
         """
         current_error_tmp = 0
-        counter = 0
-        for i in range(1000): #stop range if mean_squared_error is 3 x the same etc.
-            self.current_scaled_predictY = self.__hypothesis_function(self.scaled_X)
+        #precision = 0.00000001
+        for i in range(iterations): #stop range if log_loss is nearly the same 2 consecutive times, or range limit is reached
+            #self.current_batch = self.select_random_matrix_batch(self.scaled_features_matrix, batch_size)
+            current_batchlabels, current_batchfeatures = self.selrand_features_labels(features_matrix, labels_array, batch_size)
+            #current_predictproba = self.predict_proba(self.current_batch, self.scaled_features_coeffs, self.intercept)
+            current_predictproba = self.predict_proba(current_batchfeatures, self.scaled_features_coeffs, self.intercept)
             #intercept (tmpθ0) = ratioDApprentissage ∗ 1/m (m−1∑i=0)(predicted_proba(i) - real_class(i))
-            theta0_tmp = self.learning_rate * (1/self.nb_entries) * sum(self.current_scaled_predictY - self.scaled_Y)
+            intercept_tmp = learning_rate * (1/batch_size) * sum(current_predictproba - current_batchlabels.reshape(batch_size, 1))
+            #print(current_predictproba - current_batchlabels)
+            #for feature_index in 
+            print(self.intercept)
+            self.intercept = self.intercept - intercept_tmp
+            #print(self.intercept)
+        """
+            intercept_tmp = learning_rate * (1/self.nb_entries) * sum(self.current_predictproba - self.classes)
             #features coeffs = ratioDApprentissage ∗ 1/m (m−1∑i=0)(predicted_proba(i) − real_class(i)) ∗ j_feature_value(i)
             theta1_tmp = self.learning_rate * (1/self.nb_entries) * sum((self.current_scaled_predictY - self.scaled_Y) * self.scaled_X)
             self.theta0 = self.theta0 - theta0_tmp
@@ -215,16 +279,7 @@ class LogisticRegression_Model:
         if self.verbose is True:
             plt.show()
             plt.close()
-
-    def __set_features(self, xfeature, yfeature, dataframe):
         """
-        set appropriate x and y features as class attributes.
-        thoses features can be user-defined during object initialization.
-        """
-        if xfeature is not None and yfeature is not None:
-            self.features = [xfeature, yfeature]
-        else:
-            self.features = [dataframe.columns[0], dataframe.columns[1]]
 
     def __init_XY(self, dataframe, features):
         """
@@ -241,22 +296,6 @@ class LogisticRegression_Model:
             print("Wrong Y feature given")
             exit()
         return tmp_X, tmp_Y
-
-    def __verify_csv(self, filename):
-        """
-        very basic check for the CSV file --> it has to exist, and end in .csv
-        """
-        if not os.path.exists(filename):
-            print("The file %s does not exist!" % filename)
-            exit()
-        if not filename.endswith('.csv'):
-            print("The file %s is not a csv file!" % filename)
-            exit()
-
-    def __read_csv(self, filename):
-        self.__verify_csv(filename)
-        dataframe = pandas.read_csv(filename)
-        return dataframe
 
     def predict(self, x):
         """

@@ -59,7 +59,9 @@ def main():
     features_selected = ["Astronomy", "Herbology", "Charms", "Ancient Runes"]
     Gryffindor_Model = LogisticRegression_Model(hogwarts_df, "Gryffindor", "Hogwarts House", features_selected)
     #print(Gryffindor_Model.features_matrix)
-    Gryffindor_Model.train(Gryffindor_Model.scaled_features_matrix, Gryffindor_Model.classes, 1e-3, 50, 10, 1e-8)
+    #Gryffindor_Model.train(Gryffindor_Model.scaled_features_matrix, Gryffindor_Model.classes, 1e-3, 50, 1000, 1e-8)
+    Gryffindor_Model.train(Gryffindor_Model.scaled_features_matrix, Gryffindor_Model.classes, 1e-1, 50, 50000, 1e-8)
+    #print(Gryffindor_Model.features_coeffs)
     """
     if args.features is None or args.classname is None or args.valuepredict is None:
         logmodel = LinearRegression_Model(args.filename, verbose=args.verbose)

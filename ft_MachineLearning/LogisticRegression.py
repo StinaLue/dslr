@@ -63,11 +63,9 @@ class LogisticRegression_Model:
         self.dataframe = dataframe
         self.scaled_dataframe = (self.dataframe - self.dataframe.mean()) / self.dataframe.std()
         self.nb_entries = float(len(self.dataframe.index))
-
         self.features_selected = features_selected
-
         self.features_coeffs = np.zeros((len(features_selected), 1))
-        self.scaled_features_coeffs = np.zeros((len(features_selected), 1))
+        #self.scaled_features_coeffs = np.zeros((len(features_selected), 1))
         self.intercept = np.zeros(1)
         self.scaled_intercept = np.zeros(1)
         #INT OR FLOAT FOR 0 and 1 ??
@@ -123,7 +121,7 @@ class LogisticRegression_Model:
         assert len(features_matrix) == len(labels_array)
         shuffler = np.random.permutation(len(features_matrix))
         batch_shuffler = shuffler[:batch_size]
-        labels_batch = labels_array[batch_shuffler]
+        labels_batch = labels_array[batch_shuffler].reshape(batch_size, 1)
         features_batch = features_matrix[batch_shuffler]
         return labels_batch, features_batch
 
@@ -236,14 +234,38 @@ class LogisticRegression_Model:
             #self.current_batch = self.select_random_matrix_batch(self.scaled_features_matrix, batch_size)
             current_batchlabels, current_batchfeatures = self.selrand_features_labels(features_matrix, labels_array, batch_size)
             #current_predictproba = self.predict_proba(self.current_batch, self.scaled_features_coeffs, self.intercept)
-            current_predictproba = self.predict_proba(current_batchfeatures, self.scaled_features_coeffs, self.intercept)
-            #intercept (tmpθ0) = ratioDApprentissage ∗ 1/m (m−1∑i=0)(predicted_proba(i) - real_class(i))
-            intercept_tmp = learning_rate * (1/batch_size) * sum(current_predictproba - current_batchlabels.reshape(batch_size, 1))
+            current_predictproba = self.predict_proba(current_batchfeatures, self.features_coeffs, self.intercept)
+            #partial deriv wrt intercept (tmpθ0) = ratioDApprentissage ∗ 1/m (m−1∑i=0)(predicted_proba(i) - real_class(i))
+            #intercept_tmp = learning_rate * (1/batch_size) * sum(current_predictproba - current_batchlabels)
+            intercept_tmp = learning_rate * (1/batch_size) * np.sum(current_predictproba - current_batchlabels)
+
+            #print(intercept_tmp)
+            features_gradient_tmp = []
+            transposed_features = np.transpose(current_batchfeatures)
+            #partial deriv wrt featurecoeff (tmpθj) = ratioDApprentissage ∗ 1/m (m−1∑i=0)(predicted_proba(i) - real_class(i)) * feature_j_value(i)
+            for j in range(current_batchfeatures.shape[1]):
+                features_gradient_tmp.append(learning_rate * (1/batch_size) * np.dot(transposed_features[j], (current_predictproba - current_batchlabels)))
+            #print(features_gradient_tmp)
+                #print(np.transpose(current_batchfeatures))
+                #print(current_batchfeatures)
+            #for x in range(current_batchfeatures.shape[1]):
+            #    print(np.transpose(current_batchfeatures))
+            #print(features_matrix.shape[1])
+            #print(current_batchlabels)
             #print(current_predictproba - current_batchlabels)
-            #for feature_index in 
-            print(self.intercept)
-            self.intercept = self.intercept - intercept_tmp
+            #for feature_index in
+            #print (features_matrix)
+            #for feature in features_matrix:
+            #    print (feature)
+            print(intercept_tmp)
             #print(self.intercept)
+            self.intercept = self.intercept - intercept_tmp
+            for j in range(current_batchfeatures.shape[1]):
+                self.features_coeffs[j] = self.features_coeffs[j] - features_gradient_tmp[j]
+            #print(self.intercept)
+        #return(self.intercept)
+        print(self.intercept)
+        print(self.features_coeffs)
         """
             intercept_tmp = learning_rate * (1/self.nb_entries) * sum(self.current_predictproba - self.classes)
             #features coeffs = ratioDApprentissage ∗ 1/m (m−1∑i=0)(predicted_proba(i) − real_class(i)) ∗ j_feature_value(i)

@@ -58,9 +58,76 @@ def main():
     hogwarts_df = preprocess_dataframe(hogwarts_df)
     features_selected = ["Astronomy", "Herbology", "Charms", "Ancient Runes"]
     Gryffindor_Model = LogisticRegression_Model(hogwarts_df, "Gryffindor", "Hogwarts House", features_selected)
-    #print(Gryffindor_Model.features_matrix)
-    #Gryffindor_Model.train(Gryffindor_Model.scaled_features_matrix, Gryffindor_Model.classes, 1e-3, 50, 1000, 1e-8)
-    Gryffindor_Model.train(Gryffindor_Model.scaled_features_matrix, Gryffindor_Model.classes, 1e-1, 50, 50000, 1e-8)
+    Gryffindor_Model.train(Gryffindor_Model.scaled_features_matrix, Gryffindor_Model.classes, 1e-1, 50, 15000, 1e-4)
+    Gryffindor_Model.save_weights_csv("gryffindor_weights.csv")
+
+    Hufflepuff_Model = LogisticRegression_Model(hogwarts_df, "Hufflepuff", "Hogwarts House", features_selected)
+    Hufflepuff_Model.train(Hufflepuff_Model.scaled_features_matrix, Hufflepuff_Model.classes, 1e-1, 50, 15000, 1e-4)
+    Hufflepuff_Model.save_weights_csv("hufflepuff_weights.csv")
+
+    Ravenclaw_Model = LogisticRegression_Model(hogwarts_df, "Ravenclaw", "Hogwarts House", features_selected)
+    Ravenclaw_Model.train(Ravenclaw_Model.scaled_features_matrix, Ravenclaw_Model.classes, 1e-1, 50, 15000, 1e-4)
+    Ravenclaw_Model.save_weights_csv("ravenclaw_weights.csv")
+    
+    Slytherin_Model = LogisticRegression_Model(hogwarts_df, "Slytherin", "Hogwarts House", features_selected)
+    Slytherin_Model.train(Slytherin_Model.scaled_features_matrix, Slytherin_Model.classes, 1e-1, 50, 15000, 1e-4)
+    Slytherin_Model.save_weights_csv("slytherin_weights.csv")
+
+    #testdata = pd.read_csv("dataset_train.csv")
+    testdata = pd.read_csv("dataset_test.csv")
+    testdata = preprocess_dataframe(testdata)
+    scaled_test_data = (testdata - testdata.mean()) / testdata.std()
+    scaled_features = scaled_test_data[features_selected].to_numpy()
+    class_real = testdata["Hogwarts House"]
+    firstnames = testdata["First Name"]
+    real_classes = (testdata["Hogwarts House"] == "Gryffindor").astype(int).to_numpy()
+    probabilites = Gryffindor_Model.predict_proba(scaled_features, Gryffindor_Model.features_coeffs, Gryffindor_Model.intercept)
+    real_classes_s = (testdata["Hogwarts House"] == "Slytherin").astype(int).to_numpy()
+    probabilites_s = Slytherin_Model.predict_proba(scaled_features, Slytherin_Model.features_coeffs, Slytherin_Model.intercept)
+
+    probabilites_h = Hufflepuff_Model.predict_proba(scaled_features, Hufflepuff_Model.features_coeffs, Hufflepuff_Model.intercept)
+
+    probabilites_r = Ravenclaw_Model.predict_proba(scaled_features, Ravenclaw_Model.features_coeffs, Ravenclaw_Model.intercept)
+    
+    for firstname, proba_G, proba_S, proba_H, proba_R in zip(firstnames, probabilites, probabilites_s, probabilites_h, probabilites_r):
+        print("Hmmmm, " + str(firstname) + "is interesting... ", end="")
+        proba_tab = [proba_G, proba_S, proba_H, proba_R]
+        max_proba = max(proba_tab)
+        if (max_proba == proba_G):
+            print("Sorting Hat says : 'GRYFFINDOR !!!'")
+        elif (max_proba == proba_S):
+            print("Sorting Hat says : 'SLYTHERIN !!!'")
+        elif (max_proba == proba_H):
+            print("Sorting Hat says : 'HUFFLEPUFF !!!'")
+        elif (max_proba == proba_R):
+            print("Sorting Hat says : 'RAVENCLAW !!!'")
+        else:
+            print("Sorting Hat says : 'am confoos'")
+    """
+    for realclass, proba_G, proba_S, proba_H, proba_R in zip(class_real, probabilites, probabilites_s, probabilites_h, probabilites_r):
+        print("True is " + str(realclass) + " ", end="")
+        proba_tab = [proba_G, proba_S, proba_H, proba_R]
+        max_proba = max(proba_tab)
+        if (max_proba == proba_G):
+            print("Sorting Hat says : 'GRYFFINDOR !!!'")
+        elif (max_proba == proba_S):
+            print("Sorting Hat says : 'SLYTHERIN !!!'")
+        elif (max_proba == proba_H):
+            print("Sorting Hat says : 'HUFFLEPUFF !!!'")
+        elif (max_proba == proba_R):
+            print("Sorting Hat says : 'RAVENCLAW !!!'")
+        else:
+            print("Sorting Hat says : 'am confoos'")
+    """
+    """
+    for realclass, probability in zip(real_classes, probabilites):
+        print(realclass, end="")
+        print(probability)
+    for realclass, probability in zip(real_classes_s, probabilites_s):
+        print(realclass, end="")
+        print(probability) 
+    """
+    #Gryffindor_Model.predict_proba()
     #print(Gryffindor_Model.features_coeffs)
     """
     if args.features is None or args.classname is None or args.valuepredict is None:

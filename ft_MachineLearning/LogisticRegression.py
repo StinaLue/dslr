@@ -35,7 +35,7 @@ print("Training accuracy:", str(100 * np.mean(predictions == y)) + "%")
     """
 
 import matplotlib.pyplot as plt
-import pandas
+import pandas as pd
 import os
 import numpy as np
 
@@ -83,6 +83,7 @@ class LogisticRegression_Model:
 
         self.dict_feat_label = {"Features":self.scaled_features_matrix, "Labels":self.classes}
 
+        #self.save_weights_csv("test.txt")
         #self.__set_features(xfeature, yfeature, self.dataframe)
         #self.true_X, self.true_Y = self.__init_XY(self.dataframe, self.features)
         #self.verbose = verbose
@@ -92,7 +93,7 @@ class LogisticRegression_Model:
         #self.learning_rate = 0.1
         #self.__train()
         #self.__unscale_predictY()
-        #self.__unscale_thetas()
+        #self.unscale_thetas()
         #self.__write_thetas()
         #self.__plot_result()
 
@@ -185,21 +186,22 @@ class LogisticRegression_Model:
         log_odds = np.dot(features, coefficients) + intercept
         results = self.sigmoid(log_odds)
 
-    def __unscale_predictY(self):
+    def unscale_predictY(self):
         """
         Reverses the Z-scaling for our scaled predicted y tab
         """
         self.predictY = (self.current_scaled_predictY * self.dataframe.std()[self.features[1]]) + self.dataframe.mean()[self.features[1]]
 
-    def __unscale_thetas(self):
+    def unscale_thetas(self):
         """
         Unscale theta parameters of the Logistic functions thx to maths --> https://www.mathsisfun.com/algebra/line-equation-2points.html
         """
-        slope = (self.predictY[0] - self.predictY[1]) / (self.true_X[0] - self.true_X[1])
-        y_intercept = (slope * 0) - (slope * self.true_X[0]) + self.predictY[0]
-        self.theta1 = slope
-        self.theta0 = y_intercept
-
+        self.features_coeffs = (self.predictY[0] - self.predictY[1]) / (self.true_X[0] - self.true_X[1])
+        for i in self.features_coeffs:
+            self.intercept = (self.features_coeffs[i] * 0) - (self.features_coeffs[i] * self.true_X[0]) + self.predictY[0]
+        print (self.intercept)
+        print (self.features_coeffs)
+    
     def __write_thetas(self):
         f = open("thetas.txt", "w")
         f.write(str(self.theta0) + " " + str(self.theta1))
@@ -236,15 +238,13 @@ class LogisticRegression_Model:
             #current_predictproba = self.predict_proba(self.current_batch, self.scaled_features_coeffs, self.intercept)
             current_predictproba = self.predict_proba(current_batchfeatures, self.features_coeffs, self.intercept)
             #partial deriv wrt intercept (tmpθ0) = ratioDApprentissage ∗ 1/m (m−1∑i=0)(predicted_proba(i) - real_class(i))
-            #intercept_tmp = learning_rate * (1/batch_size) * sum(current_predictproba - current_batchlabels)
             intercept_tmp = learning_rate * (1/batch_size) * np.sum(current_predictproba - current_batchlabels)
-
-            #print(intercept_tmp)
             features_gradient_tmp = []
             transposed_features = np.transpose(current_batchfeatures)
             #partial deriv wrt featurecoeff (tmpθj) = ratioDApprentissage ∗ 1/m (m−1∑i=0)(predicted_proba(i) - real_class(i)) * feature_j_value(i)
             for j in range(current_batchfeatures.shape[1]):
                 features_gradient_tmp.append(learning_rate * (1/batch_size) * np.dot(transposed_features[j], (current_predictproba - current_batchlabels)))
+            
             #print(features_gradient_tmp)
                 #print(np.transpose(current_batchfeatures))
                 #print(current_batchfeatures)
@@ -257,8 +257,12 @@ class LogisticRegression_Model:
             #print (features_matrix)
             #for feature in features_matrix:
             #    print (feature)
-            print(intercept_tmp)
-            #print(self.intercept)
+            if (abs(intercept_tmp) <= tolerance):
+                if (np.all(np.abs(features_gradient_tmp) <= tolerance)):
+                    print("Tolerance reached")
+                    break
+            #print(np.abs(features_gradient_tmp))
+
             self.intercept = self.intercept - intercept_tmp
             for j in range(current_batchfeatures.shape[1]):
                 self.features_coeffs[j] = self.features_coeffs[j] - features_gradient_tmp[j]
@@ -303,28 +307,13 @@ class LogisticRegression_Model:
             plt.close()
         """
 
-    def __init_XY(self, dataframe, features):
-        """
-        test provided features in case they seem abnormal.
-        """
-        try:
-            tmp_X = dataframe[features[0]].to_numpy()
-        except:
-            print("Wrong X feature given")
-            exit()
-        try:
-            tmp_Y = dataframe[features[1]].to_numpy()
-        except:
-            print("Wrong Y feature given")
-            exit()
-        return tmp_X, tmp_Y
+    def save_weights_csv(self, filename):
+        column_names = ["Intercept"] + self.features_selected
+        features_coeffs = self.features_coeffs.reshape(1, len(self.features_selected))
+        column_values = np.insert(features_coeffs, 0, self.intercept, axis=1)
+        csv_df = pd.DataFrame(column_values, columns=column_names)
+        csv_df.to_csv(filename, index=False)
 
-    def predict(self, x):
-        """
-        prints a y prediction with the trained parameters kept in the class.
-        """
-        y_prediction = self.theta0 + self.theta1 * x
-        print("Prediction for x = " + str(x) + " is --> y = " + str(y_prediction))
     
 
 if __name__ == "__main__":

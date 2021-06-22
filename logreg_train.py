@@ -57,32 +57,35 @@ def main():
     hogwarts_df = read_csv(args.filename)
     hogwarts_df = preprocess_dataframe(hogwarts_df)
     features_selected = ["Astronomy", "Herbology", "Charms", "Ancient Runes"]
-    Gryffindor_Model = LogisticRegression_Model(hogwarts_df, "Gryffindor", "Hogwarts House", features_selected)
+    Gryffindor_Model = LogisticRegression_Model(hogwarts_df, features_selected, "Hogwarts House", "Gryffindor")
     Gryffindor_Model.train(Gryffindor_Model.scaled_features_matrix, Gryffindor_Model.classes, 1e-1, 50, 15000, 1e-4)
     Gryffindor_Model.save_weights_csv("gryffindor_weights.csv")
 
-    Hufflepuff_Model = LogisticRegression_Model(hogwarts_df, "Hufflepuff", "Hogwarts House", features_selected)
+    Hufflepuff_Model = LogisticRegression_Model(hogwarts_df, features_selected, "Hogwarts House", "Hufflepuff")
     Hufflepuff_Model.train(Hufflepuff_Model.scaled_features_matrix, Hufflepuff_Model.classes, 1e-1, 50, 15000, 1e-4)
     Hufflepuff_Model.save_weights_csv("hufflepuff_weights.csv")
 
-    Ravenclaw_Model = LogisticRegression_Model(hogwarts_df, "Ravenclaw", "Hogwarts House", features_selected)
+    Ravenclaw_Model = LogisticRegression_Model(hogwarts_df, features_selected, "Hogwarts House", "Ravenclaw")
     Ravenclaw_Model.train(Ravenclaw_Model.scaled_features_matrix, Ravenclaw_Model.classes, 1e-1, 50, 15000, 1e-4)
     Ravenclaw_Model.save_weights_csv("ravenclaw_weights.csv")
     
-    Slytherin_Model = LogisticRegression_Model(hogwarts_df, "Slytherin", "Hogwarts House", features_selected)
+    Slytherin_Model = LogisticRegression_Model(hogwarts_df, features_selected, "Hogwarts House", "Slytherin")
     Slytherin_Model.train(Slytherin_Model.scaled_features_matrix, Slytherin_Model.classes, 1e-1, 50, 15000, 1e-4)
     Slytherin_Model.save_weights_csv("slytherin_weights.csv")
-
+"""
     #testdata = pd.read_csv("dataset_train.csv")
     testdata = pd.read_csv("dataset_test.csv")
     testdata = preprocess_dataframe(testdata)
     scaled_test_data = (testdata - testdata.mean()) / testdata.std()
     scaled_features = scaled_test_data[features_selected].to_numpy()
-    class_real = testdata["Hogwarts House"]
+    #class_real = testdata["Hogwarts House"]
     firstnames = testdata["First Name"]
-    real_classes = (testdata["Hogwarts House"] == "Gryffindor").astype(int).to_numpy()
+    #real_classes = (testdata["Hogwarts House"] == "Gryffindor").astype(int).to_numpy()
+    #print(Gryffindor_Model.features_coeffs)
     probabilites = Gryffindor_Model.predict_proba(scaled_features, Gryffindor_Model.features_coeffs, Gryffindor_Model.intercept)
-    real_classes_s = (testdata["Hogwarts House"] == "Slytherin").astype(int).to_numpy()
+    print(Gryffindor_Model.features_coeffs)
+    print(Gryffindor_Model.intercept)
+    #real_classes_s = (testdata["Hogwarts House"] == "Slytherin").astype(int).to_numpy()
     probabilites_s = Slytherin_Model.predict_proba(scaled_features, Slytherin_Model.features_coeffs, Slytherin_Model.intercept)
 
     probabilites_h = Hufflepuff_Model.predict_proba(scaled_features, Hufflepuff_Model.features_coeffs, Hufflepuff_Model.intercept)
@@ -103,6 +106,7 @@ def main():
             print("Sorting Hat says : 'RAVENCLAW !!!'")
         else:
             print("Sorting Hat says : 'am confoos'")
+    """
     """
     for realclass, proba_G, proba_S, proba_H, proba_R in zip(class_real, probabilites, probabilites_s, probabilites_h, probabilites_r):
         print("True is " + str(realclass) + " ", end="")

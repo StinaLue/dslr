@@ -52,24 +52,25 @@ class LogisticRegression_Model:
     5. use the partial derivative to update our intercept and our features coefficients (gradient descent)
     6. run the gradient descent until we reach the best minimum (change the learning rate if needed)
     """
-    def __init__(self, dataframe, class_to_test, class_name, features_selected):
+    def __init__(self, dataframe, features_selected, class_name=None, class_to_test=None):
         """
         filename: CSV file containing the data
         xfeature: name of the feature for the x axis
         yfeature: name of the feature for the y axis
         verbose: boolean --> plot during training or not
         """
-
         self.dataframe = dataframe
         self.scaled_dataframe = (self.dataframe - self.dataframe.mean()) / self.dataframe.std()
         self.nb_entries = float(len(self.dataframe.index))
         self.features_selected = features_selected
         self.features_coeffs = np.zeros((len(features_selected), 1))
-        #self.scaled_features_coeffs = np.zeros((len(features_selected), 1))
         self.intercept = np.zeros(1)
         self.scaled_intercept = np.zeros(1)
         #INT OR FLOAT FOR 0 and 1 ??
-        self.classes = (dataframe[class_name] == class_to_test).astype(int).to_numpy()
+        if class_name is not None:
+            self.classes = (dataframe[class_name] == class_to_test).astype(int).to_numpy()
+        else:
+            self.classes = None
         np.reshape(self.classes, (int(self.nb_entries), 1))
         self.features = {}
         for i in range(len(self.features_selected)):
@@ -178,7 +179,7 @@ class LogisticRegression_Model:
         return (np.where(probabilities >= threshold, 1, 0))
 
     def predict_proba(self, features, coefficients, intercept):
-        calculated_log_odds = self.log_odds(features,coefficients, intercept)
+        calculated_log_odds = self.log_odds(features, coefficients, intercept)
         probabilities = self.sigmoid(calculated_log_odds)
         return probabilities
 
@@ -186,11 +187,11 @@ class LogisticRegression_Model:
         log_odds = np.dot(features, coefficients) + intercept
         results = self.sigmoid(log_odds)
 
-    def unscale_predictY(self):
+    #def unscale_predictY(self):
         """
         Reverses the Z-scaling for our scaled predicted y tab
         """
-        self.predictY = (self.current_scaled_predictY * self.dataframe.std()[self.features[1]]) + self.dataframe.mean()[self.features[1]]
+    #    self.predictY = (self.current_scaled_predictY * self.dataframe.std()[self.features[1]]) + self.dataframe.mean()[self.features[1]]
 
     def unscale_thetas(self):
         """
@@ -201,14 +202,14 @@ class LogisticRegression_Model:
             self.intercept = (self.features_coeffs[i] * 0) - (self.features_coeffs[i] * self.true_X[0]) + self.predictY[0]
         print (self.intercept)
         print (self.features_coeffs)
-    
+    """
     def __write_thetas(self):
         f = open("thetas.txt", "w")
         f.write(str(self.theta0) + " " + str(self.theta1))
         f.close()
         print("t0 " + str(self.theta0))
         print("t1 " + str(self.theta1))
-
+"""
     def __plot_result(self):
         """
         plots the end result of our training.
@@ -268,8 +269,8 @@ class LogisticRegression_Model:
                 self.features_coeffs[j] = self.features_coeffs[j] - features_gradient_tmp[j]
             #print(self.intercept)
         #return(self.intercept)
-        print(self.intercept)
-        print(self.features_coeffs)
+        #print(self.intercept)
+        #print(self.features_coeffs)
         """
             intercept_tmp = learning_rate * (1/self.nb_entries) * sum(self.current_predictproba - self.classes)
             #features coeffs = ratioDApprentissage ∗ 1/m (m−1∑i=0)(predicted_proba(i) − real_class(i)) ∗ j_feature_value(i)

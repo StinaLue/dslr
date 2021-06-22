@@ -4,6 +4,7 @@ import pandas as pd
 import os
 from argparse import ArgumentParser
 import numpy as np
+from sklearn.metrics import accuracy_score
 
 #from logreg_train import read_csv
 
@@ -69,6 +70,15 @@ def predict_probability(features, coefficients, intercept):
         probabilities = sigmoid(calculated_log_odds)
         return probabilities
         
+def create_house_model(filename, modelname, scaled_features, features_selected):
+    housedata = pd.read_csv(filename)
+    intercept = (housedata["Intercept"]).astype(float).to_numpy()
+    features_coeffs = np.zeros((len(features_selected), 1))
+    for i, column in enumerate(housedata.columns[1:]):
+        features_coeffs[i] = housedata[column]
+    modelname = LogisticRegression_Model(housedata, features_selected)
+    probabilites = modelname.predict_proba(scaled_features, features_coeffs, intercept)
+    return(probabilites)
 
 def sortinghat(testdata):
     features_selected = ["Astronomy", "Herbology", "Charms", "Ancient Runes"]
@@ -76,7 +86,12 @@ def sortinghat(testdata):
     scaled_test_data = (testdata - testdata.mean()) / testdata.std()
     scaled_features = scaled_test_data[features_selected].to_numpy()
     firstnames = testdata["First Name"]
+    probabilites_g = create_house_model("gryffindor_weights.csv", "Gryffindor", scaled_features, features_selected)
+    probabilites_s = create_house_model("slytherin_weights.csv", "Slytherin", scaled_features, features_selected)
+    probabilites_h = create_house_model("hufflepuff_weights.csv", "Hufflepuff", scaled_features, features_selected)
+    probabilites_r = create_house_model("ravenclaw_weights.csv", "Ravenclaw", scaled_features, features_selected)
 
+    """
     gryffindordata = pd.read_csv("gryffindor_weights.csv")
     g_intercept = (gryffindordata["Intercept"]).astype(float).to_numpy()
     g_features_coeffs = np.zeros((len(features_selected), 1))
@@ -84,7 +99,7 @@ def sortinghat(testdata):
         g_features_coeffs[i] = gryffindordata[column]
     Gryffindor_Model = LogisticRegression_Model(gryffindordata, features_selected)
     probabilites_g = Gryffindor_Model.predict_proba(scaled_features, g_features_coeffs, g_intercept)
-
+    
     slytherindata = pd.read_csv("slytherin_weights.csv")
     s_intercept = (slytherindata["Intercept"]).astype(float).to_numpy()
     s_features_coeffs = np.zeros((len(features_selected), 1))
@@ -108,10 +123,9 @@ def sortinghat(testdata):
         r_features_coeffs[i] = ravenclawdata[column]
     Ravenclaw_Model = LogisticRegression_Model(ravenclawdata, features_selected)
     probabilites_r = Ravenclaw_Model.predict_proba(scaled_features, r_features_coeffs, r_intercept)
+    """
 
     rows = []
-    #df = pd.DataFrame({'Hogwarts House': r_features_coeffs[1]})
-    #df.to_csv("test.csv", index_label="Index")
     for firstname, proba_G, proba_S, proba_H, proba_R in zip(firstnames, probabilites_g, probabilites_s, probabilites_h, probabilites_r):
         print("Hmmmm, " + str(firstname) + " is interesting... ", end="")
         proba_tab = [proba_G, proba_S, proba_H, proba_R]

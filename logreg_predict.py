@@ -81,42 +81,34 @@ def sortinghat(testdata):
     gryffindordata = pd.read_csv("gryffindor_weights.csv")
     g_intercept = (gryffindordata["Intercept"]).astype(float).to_numpy()
     g_features_coeffs = np.zeros((len(features_selected), 1))
-    g_features_coeffs[0] = gryffindordata["Astronomy"].astype(float).to_numpy()
-    g_features_coeffs[1] = gryffindordata["Herbology"].astype(float).to_numpy()
-    g_features_coeffs[2] = gryffindordata["Charms"].astype(float).to_numpy()
-    g_features_coeffs[3] = gryffindordata["Ancient Runes"].astype(float).to_numpy()
+    for i, column in enumerate(gryffindordata.columns[1:]):
+        g_features_coeffs[i] = gryffindordata[column]
     Gryffindor_Model = LogisticRegression_Model(gryffindordata, features_selected)
     probabilites_g = Gryffindor_Model.predict_proba(scaled_features, g_features_coeffs, g_intercept)
 
     slytherindata = pd.read_csv("slytherin_weights.csv")
-    g_intercept = (slytherindata["Intercept"]).astype(float).to_numpy()
-    g_features_coeffs = np.zeros((len(features_selected), 1))
-    g_features_coeffs[0] = slytherindata["Astronomy"].astype(float).to_numpy()
-    g_features_coeffs[1] = slytherindata["Herbology"].astype(float).to_numpy()
-    g_features_coeffs[2] = slytherindata["Charms"].astype(float).to_numpy()
-    g_features_coeffs[3] = slytherindata["Ancient Runes"].astype(float).to_numpy()
+    s_intercept = (slytherindata["Intercept"]).astype(float).to_numpy()
+    s_features_coeffs = np.zeros((len(features_selected), 1))
+    for i, column in enumerate(slytherindata.columns[1:]):
+        s_features_coeffs[i] = slytherindata[column]
     Slytherin_Model = LogisticRegression_Model(slytherindata, features_selected)
-    probabilites_s = Slytherin_Model.predict_proba(scaled_features, g_features_coeffs, g_intercept)
+    probabilites_s = Slytherin_Model.predict_proba(scaled_features, s_features_coeffs, s_intercept)
     
     hufflepuffdata = pd.read_csv("hufflepuff_weights.csv")
-    g_intercept = (hufflepuffdata["Intercept"]).astype(float).to_numpy()
-    g_features_coeffs = np.zeros((len(features_selected), 1))
-    g_features_coeffs[0] = hufflepuffdata["Astronomy"].astype(float).to_numpy()
-    g_features_coeffs[1] = hufflepuffdata["Herbology"].astype(float).to_numpy()
-    g_features_coeffs[2] = hufflepuffdata["Charms"].astype(float).to_numpy()
-    g_features_coeffs[3] = hufflepuffdata["Ancient Runes"].astype(float).to_numpy()
+    h_intercept = (hufflepuffdata["Intercept"]).astype(float).to_numpy()
+    h_features_coeffs = np.zeros((len(features_selected), 1))
+    for i, column in enumerate(hufflepuffdata.columns[1:]):
+        h_features_coeffs[i] = hufflepuffdata[column]
     Hufflepuff_Model = LogisticRegression_Model(hufflepuffdata, features_selected)
-    probabilites_h = Hufflepuff_Model.predict_proba(scaled_features, g_features_coeffs, g_intercept)
+    probabilites_h = Hufflepuff_Model.predict_proba(scaled_features, h_features_coeffs, h_intercept)
 
     ravenclawdata = pd.read_csv("ravenclaw_weights.csv")
-    g_intercept = (ravenclawdata["Intercept"]).astype(float).to_numpy()
-    g_features_coeffs = np.zeros((len(features_selected), 1))
-    g_features_coeffs[0] = ravenclawdata["Astronomy"].astype(float).to_numpy()
-    g_features_coeffs[1] = ravenclawdata["Herbology"].astype(float).to_numpy()
-    g_features_coeffs[2] = ravenclawdata["Charms"].astype(float).to_numpy()
-    g_features_coeffs[3] = ravenclawdata["Ancient Runes"].astype(float).to_numpy()
+    r_intercept = (ravenclawdata["Intercept"]).astype(float).to_numpy()
+    r_features_coeffs = np.zeros((len(features_selected), 1))
+    for i, column in enumerate(ravenclawdata.columns[1:]):
+        r_features_coeffs[i] = ravenclawdata[column]
     Ravenclaw_Model = LogisticRegression_Model(ravenclawdata, features_selected)
-    probabilites_r = Ravenclaw_Model.predict_proba(scaled_features, g_features_coeffs, g_intercept)
+    probabilites_r = Ravenclaw_Model.predict_proba(scaled_features, r_features_coeffs, r_intercept)
 
     for firstname, proba_G, proba_S, proba_H, proba_R in zip(firstnames, probabilites_g, probabilites_s, probabilites_h, probabilites_r):
         print("Hmmmm, " + str(firstname) + "is interesting... ", end="")

@@ -73,7 +73,6 @@ def predict_probability(features, coefficients, intercept):
 def sortinghat(testdata):
     features_selected = ["Astronomy", "Herbology", "Charms", "Ancient Runes"]
 
-
     scaled_test_data = (testdata - testdata.mean()) / testdata.std()
     scaled_features = scaled_test_data[features_selected].to_numpy()
     firstnames = testdata["First Name"]
@@ -110,55 +109,44 @@ def sortinghat(testdata):
     Ravenclaw_Model = LogisticRegression_Model(ravenclawdata, features_selected)
     probabilites_r = Ravenclaw_Model.predict_proba(scaled_features, r_features_coeffs, r_intercept)
 
+    rows = []
+    #df = pd.DataFrame({'Hogwarts House': r_features_coeffs[1]})
+    #df.to_csv("test.csv", index_label="Index")
     for firstname, proba_G, proba_S, proba_H, proba_R in zip(firstnames, probabilites_g, probabilites_s, probabilites_h, probabilites_r):
-        print("Hmmmm, " + str(firstname) + "is interesting... ", end="")
+        print("Hmmmm, " + str(firstname) + " is interesting... ", end="")
         proba_tab = [proba_G, proba_S, proba_H, proba_R]
         max_proba = max(proba_tab)
         if (max_proba == proba_G):
+            rows.append("Gryffindor")
             print("Sorting Hat says : 'GRYFFINDOR !!!'")
         elif (max_proba == proba_S):
+            rows.append("Slytherin")
             print("Sorting Hat says : 'SLYTHERIN !!!'")
         elif (max_proba == proba_H):
             print("Sorting Hat says : 'HUFFLEPUFF !!!'")
+            rows.append("Hufflepuff")
         elif (max_proba == proba_R):
             print("Sorting Hat says : 'RAVENCLAW !!!'")
+            rows.append("Ravenclaw")
         else:
             print("Sorting Hat says : 'am confoos'")
-"""    
+            rows.append("NOTHING?")
+    df = pd.DataFrame(rows, columns=["Hogwarts House"])
+    df.to_csv("houses.csv", index_label="Index")
     
-    scaled_test_data = (testdata - testdata.mean()) / testdata.std()
-    scaled_features = scaled_test_data[features_selected].to_numpy()
-    class_real = testdata["Hogwarts House"]
-    firstnames = testdata["First Name"]
-    #real_classes = (testdata["Hogwarts House"] == "Gryffindor").astype(int).to_numpy()
-    probabilites_g = Gryffindor_Model.predict_proba(scaled_features, gryffindordata[features_selected], gryffindordata["Intercept"])
-    #real_classes_s = (testdata["Hogwarts House"] == "Slytherin").astype(int).to_numpy()
-    probabilites_s = Slytherin_Model.predict_proba(scaled_features, Slytherin_Model.features_coeffs, Slytherin_Model.intercept)
-
-    probabilites_h = Hufflepuff_Model.predict_proba(scaled_features, Hufflepuff_Model.features_coeffs, Hufflepuff_Model.intercept)
-
-    probabilites_r = Ravenclaw_Model.predict_proba(scaled_features, Ravenclaw_Model.features_coeffs, Ravenclaw_Model.intercept)
-    
-    for firstname, proba_G, proba_S, proba_H, proba_R in zip(firstnames, probabilites_g, probabilites_s, probabilites_h, probabilites_r):
-        print("Hmmmm, " + str(firstname) + "is interesting... ", end="")
-        proba_tab = [proba_G, proba_S, proba_H, proba_R]
-        max_proba = max(proba_tab)
-        if (max_proba == proba_G):
-            print("Sorting Hat says : 'GRYFFINDOR !!!'")
-        elif (max_proba == proba_S):
-            print("Sorting Hat says : 'SLYTHERIN !!!'")
-        elif (max_proba == proba_H):
-            print("Sorting Hat says : 'HUFFLEPUFF !!!'")
-        elif (max_proba == proba_R):
-            print("Sorting Hat says : 'RAVENCLAW !!!'")
-        else:
-            print("Sorting Hat says : 'am confoos'")
+    """csv_df = pd.DataFrame(max_proba, columns="House")
+    csv_df.to_csv("test.csv")
+    """
+    """column_names = ["Index"] + ["Hogwarts House"]
+    column_values = np.insert(features_coeffs, 0, self.intercept, axis=1)
+    csv_df = pd.DataFrame(column_values, columns=column_names)
+    csv_df.to_csv(filename, index=False)
     """
 
 def main():
     args = parse_arguments()
-    test_df = read_csv(args.filename)
-    test_df = preprocess_dataframe(test_df)
-    sortinghat(test_df)
+    df = read_csv(args.filename)
+    df = preprocess_dataframe(df)
+    sortinghat(df)
 
 main()

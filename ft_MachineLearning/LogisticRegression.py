@@ -315,8 +315,6 @@ class LogisticRegression_Model:
         csv_df = pd.DataFrame(column_values, columns=column_names)
         csv_df.to_csv(filename, index=False)
 
-    
-
 if __name__ == "__main__":
     from argparse import ArgumentParser
     def parse_arguments():  

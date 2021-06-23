@@ -91,72 +91,33 @@ def sortinghat(testdata):
     probabilites_h = create_house_model("hufflepuff_weights.csv", "Hufflepuff", scaled_features, features_selected)
     probabilites_r = create_house_model("ravenclaw_weights.csv", "Ravenclaw", scaled_features, features_selected)
 
-    """
-    gryffindordata = pd.read_csv("gryffindor_weights.csv")
-    g_intercept = (gryffindordata["Intercept"]).astype(float).to_numpy()
-    g_features_coeffs = np.zeros((len(features_selected), 1))
-    for i, column in enumerate(gryffindordata.columns[1:]):
-        g_features_coeffs[i] = gryffindordata[column]
-    Gryffindor_Model = LogisticRegression_Model(gryffindordata, features_selected)
-    probabilites_g = Gryffindor_Model.predict_proba(scaled_features, g_features_coeffs, g_intercept)
-    
-    slytherindata = pd.read_csv("slytherin_weights.csv")
-    s_intercept = (slytherindata["Intercept"]).astype(float).to_numpy()
-    s_features_coeffs = np.zeros((len(features_selected), 1))
-    for i, column in enumerate(slytherindata.columns[1:]):
-        s_features_coeffs[i] = slytherindata[column]
-    Slytherin_Model = LogisticRegression_Model(slytherindata, features_selected)
-    probabilites_s = Slytherin_Model.predict_proba(scaled_features, s_features_coeffs, s_intercept)
-    
-    hufflepuffdata = pd.read_csv("hufflepuff_weights.csv")
-    h_intercept = (hufflepuffdata["Intercept"]).astype(float).to_numpy()
-    h_features_coeffs = np.zeros((len(features_selected), 1))
-    for i, column in enumerate(hufflepuffdata.columns[1:]):
-        h_features_coeffs[i] = hufflepuffdata[column]
-    Hufflepuff_Model = LogisticRegression_Model(hufflepuffdata, features_selected)
-    probabilites_h = Hufflepuff_Model.predict_proba(scaled_features, h_features_coeffs, h_intercept)
-
-    ravenclawdata = pd.read_csv("ravenclaw_weights.csv")
-    r_intercept = (ravenclawdata["Intercept"]).astype(float).to_numpy()
-    r_features_coeffs = np.zeros((len(features_selected), 1))
-    for i, column in enumerate(ravenclawdata.columns[1:]):
-        r_features_coeffs[i] = ravenclawdata[column]
-    Ravenclaw_Model = LogisticRegression_Model(ravenclawdata, features_selected)
-    probabilites_r = Ravenclaw_Model.predict_proba(scaled_features, r_features_coeffs, r_intercept)
-    """
-
     rows = []
     for firstname, proba_G, proba_S, proba_H, proba_R in zip(firstnames, probabilites_g, probabilites_s, probabilites_h, probabilites_r):
-        print("Hmmmm, " + str(firstname) + " is interesting... ", end="")
+        #print("Hmmmm, " + str(firstname) + " is interesting... ", end="")
         proba_tab = [proba_G, proba_S, proba_H, proba_R]
         max_proba = max(proba_tab)
         if (max_proba == proba_G):
             rows.append("Gryffindor")
-            print("Sorting Hat says : 'GRYFFINDOR !!!'")
+            #print("Sorting Hat says : 'GRYFFINDOR !!!'")
         elif (max_proba == proba_S):
             rows.append("Slytherin")
-            print("Sorting Hat says : 'SLYTHERIN !!!'")
+            #print("Sorting Hat says : 'SLYTHERIN !!!'")
         elif (max_proba == proba_H):
-            print("Sorting Hat says : 'HUFFLEPUFF !!!'")
+            #print("Sorting Hat says : 'HUFFLEPUFF !!!'")
             rows.append("Hufflepuff")
         elif (max_proba == proba_R):
-            print("Sorting Hat says : 'RAVENCLAW !!!'")
+            #print("Sorting Hat says : 'RAVENCLAW !!!'")
             rows.append("Ravenclaw")
         else:
-            print("Sorting Hat says : 'am confoos'")
-            rows.append("NOTHING?")
+            #print("Sorting Hat says : 'am confoos'")
+            rows.append("Error")
     df = pd.DataFrame(rows, columns=["Hogwarts House"])
     df.to_csv("houses.csv", index_label="Index")
-    
-    """csv_df = pd.DataFrame(max_proba, columns="House")
-    csv_df.to_csv("test.csv")
-    """
-    """column_names = ["Index"] + ["Hogwarts House"]
-    column_values = np.insert(features_coeffs, 0, self.intercept, axis=1)
-    csv_df = pd.DataFrame(column_values, columns=column_names)
-    csv_df.to_csv(filename, index=False)
-    """
-
+"""
+    y_true = testdata["Hogwarts House"]
+    y_pred = df["Hogwarts House"]
+    print (accuracy_score(y_true, y_pred))
+"""
 def main():
     args = parse_arguments()
     df = read_csv(args.filename)

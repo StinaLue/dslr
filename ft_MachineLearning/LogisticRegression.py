@@ -1,39 +1,3 @@
-# CodeCademy : def log_loss(probabilities,actual_class):
-# return np.sum(-(1/actual_class.shape[0])*(actual_class*np.log(probabilities) + (1-actual_class)*np.log(1-probabilities)))
-
-# return (np.where(probabilities >= threshold, 1, 0))
-"""
-def sigmoid(z):
-    return 1 / (1 + np.exp(-z))
-
-def cost(theta, X, y):
-    predictions = sigmoid(X @ theta)
-    predictions[predictions == 1] = 0.999 # log(1)=0 causes error in division
-    error = -y * np.log(predictions) - (1 - y) * np.log(1 - predictions);
-    return sum(error) / len(y);
-
-def cost_gradient(theta, X, y):
-    predictions = sigmoid(X @ theta);
-    return X.transpose() @ (predictions - y) / len(y)
-
-
-X = np.ones(shape=(x.shape[0], x.shape[1] + 1))
-X[:, 1:] = x
-
-classifiers = np.zeros(shape=(numLabels, numFeatures + 1))
-for c in range(0, numLabels):
-    label = (y == c).astype(int)
-    initial_theta = np.zeros(X.shape[1])
-    classifiers[c, :] = opt.fmin_cg(cost, initial_theta, cost_gradient, (X, label), disp=0)
-
-
-
-
-predictions = classProbabilities.argmax(axis=1)
-
-print("Training accuracy:", str(100 * np.mean(predictions == y)) + "%")
-    """
-
 import matplotlib.pyplot as plt
 import pandas as pd
 import os
@@ -83,20 +47,6 @@ class LogisticRegression_Model:
         self.scaled_features_matrix = self.scaled_dataframe[features_selected].to_numpy()
 
         self.dict_feat_label = {"Features":self.scaled_features_matrix, "Labels":self.classes}
-
-        #self.save_weights_csv("test.txt")
-        #self.__set_features(xfeature, yfeature, self.dataframe)
-        #self.true_X, self.true_Y = self.__init_XY(self.dataframe, self.features)
-        #self.verbose = verbose
-        #self.scaled_X, self.scaled_Y = self.__init_XY(self.scaled_dataframe, self.features)
-        #self.theta0 = 0.0
-        #self.theta1 = 0.0
-        #self.learning_rate = 0.1
-        #self.__train()
-        #self.__unscale_predictY()
-        #self.unscale_thetas()
-        #self.__write_thetas()
-        #self.__plot_result()
 
     def select_random_matrix_batch(self, features_matrix, batch_size):
         """
@@ -202,14 +152,7 @@ class LogisticRegression_Model:
             self.intercept = (self.features_coeffs[i] * 0) - (self.features_coeffs[i] * self.true_X[0]) + self.predictY[0]
         print (self.intercept)
         print (self.features_coeffs)
-    """
-    def __write_thetas(self):
-        f = open("thetas.txt", "w")
-        f.write(str(self.theta0) + " " + str(self.theta1))
-        f.close()
-        print("t0 " + str(self.theta0))
-        print("t1 " + str(self.theta1))
-"""
+
     def __plot_result(self):
         """
         plots the end result of our training.
@@ -245,68 +188,15 @@ class LogisticRegression_Model:
             #partial deriv wrt featurecoeff (tmpθj) = ratioDApprentissage ∗ 1/m (m−1∑i=0)(predicted_proba(i) - real_class(i)) * feature_j_value(i)
             for j in range(current_batchfeatures.shape[1]):
                 features_gradient_tmp.append(learning_rate * (1/batch_size) * np.dot(transposed_features[j], (current_predictproba - current_batchlabels)))
-            
-            #print(features_gradient_tmp)
-                #print(np.transpose(current_batchfeatures))
-                #print(current_batchfeatures)
-            #for x in range(current_batchfeatures.shape[1]):
-            #    print(np.transpose(current_batchfeatures))
-            #print(features_matrix.shape[1])
-            #print(current_batchlabels)
-            #print(current_predictproba - current_batchlabels)
-            #for feature_index in
-            #print (features_matrix)
-            #for feature in features_matrix:
-            #    print (feature)
+
             if (abs(intercept_tmp) <= tolerance):
                 if (np.all(np.abs(features_gradient_tmp) <= tolerance)):
                     print("Tolerance reached")
                     break
-            #print(np.abs(features_gradient_tmp))
 
             self.intercept = self.intercept - intercept_tmp
             for j in range(current_batchfeatures.shape[1]):
                 self.features_coeffs[j] = self.features_coeffs[j] - features_gradient_tmp[j]
-            #print(self.intercept)
-        #return(self.intercept)
-        #print(self.intercept)
-        #print(self.features_coeffs)
-        """
-            intercept_tmp = learning_rate * (1/self.nb_entries) * sum(self.current_predictproba - self.classes)
-            #features coeffs = ratioDApprentissage ∗ 1/m (m−1∑i=0)(predicted_proba(i) − real_class(i)) ∗ j_feature_value(i)
-            theta1_tmp = self.learning_rate * (1/self.nb_entries) * sum((self.current_scaled_predictY - self.scaled_Y) * self.scaled_X)
-            self.theta0 = self.theta0 - theta0_tmp
-            self.theta1 = self.theta1 - theta1_tmp
-            current_error = self.log_loss(predicted_probabilities, actual_class)
-            if current_error == current_error_tmp:
-                counter += 1
-            else:
-                counter = 0
-            if counter > 10:
-                print("Minimum cost found, stopped training")
-                break
-            current_error_tmp = current_error
-            if self.verbose is True:
-                try:
-                    #offset = 0.5
-                    offset = 0.1
-                    plt.cla()
-                    plt.scatter(self.scaled_X, self.scaled_Y)
-                    plt.plot(self.scaled_X, self.current_scaled_predictY, color='red', marker='o')  # regression line
-                    for j in range(len(self.scaled_X)):
-                        plt.plot([self.scaled_X[j], self.scaled_X[j]], [self.scaled_Y[j], self.current_scaled_predictY[j]], color='yellow')
-                    plt.axis([min(self.scaled_X) - offset, max(self.scaled_X) + offset, \
-                        min(self.scaled_Y) - offset, max(self.scaled_Y) + offset])
-                    plt.axis("off")
-                    plt.pause(0.0001)
-                    print("current error : "+str(current_error))
-                except KeyboardInterrupt:
-                    print("The program was quitted before completion. Therefore the thetas were not saved")
-                    exit()
-        if self.verbose is True:
-            plt.show()
-            plt.close()
-        """
 
     def save_weights_csv(self, filename):
         column_names = ["Intercept"] + self.features_selected

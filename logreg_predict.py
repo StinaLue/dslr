@@ -6,8 +6,6 @@ from argparse import ArgumentParser
 import numpy as np
 from sklearn.metrics import accuracy_score
 
-#from logreg_train import read_csv
-
 def read_csv(filename):
     verify_csv(filename)
     dataframe = pd.read_csv(filename)
@@ -35,40 +33,6 @@ def parse_arguments():
         help="Filename of the dataset CSV file",
         required=True)
     return parser.parse_args()
-
-def log_odds(features, coefficients, intercept):
-        """
-        features: numpy array holding all features used
-        coefficients: numpy array holding the coefficients of each respective feature
-        intercept: numpy array only holding the single value of the intercept
-
-        log-odds are used to know the probability of a data sample belonging to the positive class
-        They replace our prediction in a linear regression, and it works the same way:
-        multiply each feature by its respective coefficient (weight/theta), and add the intercept
-
-        Returns the log-odds in a numpy array
-        """
-        print (np.dot(features, coefficients))
-        return np.dot(features, coefficients) + intercept
-
-def sigmoid(z):
-        """
-        z: log-odds in a numpy array
-
-        Maps the log-odds z into the sigmoid function.
-        The sigmoid function looks like this:
-        h(z) = 1 / 1 + e^(-z)
-        This effectively scales our log-odds in the range [0,1].
-        The results are used later to categorize easily (probability from 0 to 100% for a predicted class).
-
-        returns sigmoid mapped log-odds in a numpy array
-        """
-        return 1.0 / (1.0 + np.exp(-z))
-
-def predict_probability(features, coefficients, intercept):
-        calculated_log_odds = log_odds(features, coefficients, intercept)
-        probabilities = sigmoid(calculated_log_odds)
-        return probabilities
         
 def create_house_model(filename, modelname, scaled_features, features_selected):
     housedata = pd.read_csv(filename)
@@ -98,26 +62,17 @@ def sortinghat(testdata):
         max_proba = max(proba_tab)
         if (max_proba == proba_G):
             rows.append("Gryffindor")
-            #print("Sorting Hat says : 'GRYFFINDOR !!!'")
         elif (max_proba == proba_S):
             rows.append("Slytherin")
-            #print("Sorting Hat says : 'SLYTHERIN !!!'")
         elif (max_proba == proba_H):
-            #print("Sorting Hat says : 'HUFFLEPUFF !!!'")
             rows.append("Hufflepuff")
         elif (max_proba == proba_R):
-            #print("Sorting Hat says : 'RAVENCLAW !!!'")
             rows.append("Ravenclaw")
         else:
-            #print("Sorting Hat says : 'am confoos'")
             rows.append("Error")
     df = pd.DataFrame(rows, columns=["Hogwarts House"])
     df.to_csv("houses.csv", index_label="Index")
-"""
-    y_true = testdata["Hogwarts House"]
-    y_pred = df["Hogwarts House"]
-    print (accuracy_score(y_true, y_pred))
-"""
+
 def main():
     args = parse_arguments()
     df = read_csv(args.filename)

@@ -32,9 +32,11 @@ class FeatureData():
         self.mean = 0
         self.std = 0
         self.min = 0
+        self.per5 = 0
         self.per25 = 0
         self.per50 = 0
         self.per75 = 0
+        self.per95 = 0
         self.max = 0
         self.name = feature.name
         self.feature = feature
@@ -43,9 +45,11 @@ class FeatureData():
         self.__sort_feature()
         self.__count_feature()
         self.__min_feature()
+        self.__per5_feature()
         self.__per25_feature()
         self.__per50_feature()
         self.__per75_feature()
+        self.__per95_feature()
         self.__max_feature()
         self.__mean_feature()
         self.__std_feature()
@@ -57,9 +61,11 @@ class FeatureData():
             "mean": self.mean,
             "std": self.std,
             "min": self.min,
+            "5%": self.per5,
             "25%": self.per25,
             "50%": self.per50,
             "75%": self.per75,
+            "95%": self.per95,
             "max": self.max
         })
         
@@ -70,9 +76,11 @@ class FeatureData():
             self.mean,
             self.std,
             self.min,
+            self.per5,
             self.per25,
             self.per50,
             self.per75,
+            self.per95,
             self.max
         ])
 
@@ -103,6 +111,21 @@ class FeatureData():
     
     def __mean_feature(self):
         self.mean = self.feature.sum() / self.count
+
+    def __per5_feature(self):
+        """
+        https://stackoverflow.com/questions/2374640/how-do-i-calculate-percentiles-with-python-numpy
+        """
+        index = 0.05 * (self.count - 1)
+        c = math.ceil(index)
+        f = math.floor(index)
+
+        if c == f:
+            self.per5 = self.feature.values[int(index)]
+        else:
+            d0 = self.feature.values[int(f)] * (c - index)
+            d1 = self.feature.values[int(c)] * (index - f)
+            self.per5 = d0 + d1
 
     def __per25_feature(self):
         """
@@ -148,7 +171,22 @@ class FeatureData():
             d0 = self.feature.values[int(f)] * (c - index)
             d1 = self.feature.values[int(c)] * (index - f)
             self.per75 = d0 + d1
-    
+
+    def __per95_feature(self):
+        """
+        https://stackoverflow.com/questions/2374640/how-do-i-calculate-percentiles-with-python-numpy
+        """
+        index = 0.95 * (self.count - 1)
+        c = math.ceil(index)
+        f = math.floor(index)
+
+        if c == f:
+            self.per95 = self.feature.values[int(index)]
+        else:
+            d0 = self.feature.values[int(f)] * (c - index)
+            d1 = self.feature.values[int(c)] * (index - f)
+            self.per95 = d0 + d1
+
 def filter_dataframe(dataframe):
     numerics = ['int16', 'int32', 'int64', 'float16', 'float32', 'float64']
     filtered_dataframe = dataframe.select_dtypes(include=numerics)
@@ -170,9 +208,11 @@ lst.append([
             "mean",
             "std",
             "min",
+            "5%",
             "25%",
             "50%",
             "75%",
+            "95%",
             "max"
             ])
 
@@ -183,10 +223,3 @@ for indexes,ft1,ft2,ft3,ft4,ft5,ft6,ft7,ft8,ft9,ft10,ft11,ft12,ft13 in zip(*lst)
         print("{:<5}{:>14.10}{:>14.10}{:>14.10}{:>14.10}{:>14.10}{:>14.10}{:>14.10}{:>14.10}{:>14.10}{:>14.10}{:>14.10}{:>14.10}{:>14.10}".format("",ft1, ft2, ft3, ft4, ft5, ft6, ft7, ft8, ft9, ft10, ft11, ft12, ft13))
     else:
         print("{:<5}{:>14.5f}{:>14.5f}{:>14.5f}{:>14.5f}{:>14.5f}{:>14.5f}{:>14.5f}{:>14.5f}{:>14.5f}{:>14.5f}{:>14.5f}{:>14.5f}{:>14.5f}".format(indexes, ft1, ft2, ft3, ft4, ft5, ft6, ft7, ft8, ft9, ft10, ft11, ft12, ft13))
-
-#for i in range(len(lst)):
-    #print(lst[i].min, end="\t")
-#    print("{:.5f}".format(lst[i].min), end="\t")
-#print(df.describe())
-#test.__sort_feature()
-#test.__clean_empty_feature()

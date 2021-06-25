@@ -31,23 +31,10 @@ def parse_arguments():
         dest="filename",
         help="Filename of the dataset CSV file",
         required=True)
-    parser.add_argument("-v", "--verbose",
-        action="store_true",
-        dest="verbose",
-        default=False,
-        help="Give a verbose output of the linear regression training")
     parser.add_argument("--classname",
         dest="classname",
         default=None,
         help="Name of the class category that we try to predict")
-    parser.add_argument("--valuepredict",
-        dest="valuepredict",
-        default=None,
-        help="Name or value, defines what in the dataset is going to be a 1, and the rest will be a 0")
-    parser.add_argument("--features",
-        dest="features",
-        default=None,
-        help="features to use for training in the given file, shape is 'featurename1,featurename2...'")
     return parser.parse_args()
 
 

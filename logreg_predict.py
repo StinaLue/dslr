@@ -4,7 +4,9 @@ import pandas as pd
 import os
 from argparse import ArgumentParser
 import numpy as np
-from sklearn.metrics import accuracy_score
+import seaborn as sns
+import matplotlib.pyplot as plt
+
 
 def read_csv(filename):
     verify_csv(filename)
@@ -32,6 +34,9 @@ def parse_arguments():
         dest="filename",
         help="Filename of the dataset CSV file",
         required=True)
+    parser.add_argument("-v",
+        action="store_true",
+        help="Show the distribution of students this year")
     return parser.parse_args()
         
 def create_house_model(filename, modelname, scaled_features, features_selected):
@@ -44,7 +49,7 @@ def create_house_model(filename, modelname, scaled_features, features_selected):
     probabilites = modelname.predict_proba(scaled_features, features_coeffs, intercept)
     return(probabilites)
 
-def sortinghat(testdata):
+def sortinghat(testdata, args):
     features_selected = ["Astronomy", "Herbology", "Charms", "Ancient Runes"]
 
     scaled_test_data = (testdata - testdata.mean()) / testdata.std()
@@ -73,10 +78,18 @@ def sortinghat(testdata):
     df = pd.DataFrame(rows, columns=["Hogwarts House"])
     df.to_csv("houses.csv", index_label="Index")
 
+    if args.v:
+        color_dict = dict({'Hufflepuff':'gold',
+                  'Slytherin':'lime',
+                  'Ravenclaw': 'blue',
+                  'Gryffindor': 'red'})
+        sns.countplot(x="Hogwarts House", palette=color_dict, data=df).set_title("Distribution of students in 2021")
+        plt.show()
+
 def main():
     args = parse_arguments()
     df = read_csv(args.filename)
     df = preprocess_dataframe(df)
-    sortinghat(df)
+    sortinghat(df, args)
 
 main()

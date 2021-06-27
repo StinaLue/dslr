@@ -4,10 +4,11 @@ import pandas
 import matplotlib.pyplot as plt
 import numpy as np
 from numbers import Number
+from argparse import ArgumentParser
 from pandas.api.types import is_numeric_dtype
 import math
 
-class FeatureData():
+class FeatureData:
     """
     Takes a numerical pandas Series and computes several attributes related to its data
 
@@ -17,7 +18,7 @@ class FeatureData():
     mean : average value from all entries
     std : standard deviation (amount of variation or dispersion in the values)
     min : minimum value in all entries
-    per25/50/75 : specific values at 25%/50%/75%
+    per5/25/50/75/95 : specific values at 5%/25%/50%/75%/95%
     max : maximum value in all entries
     name : name of the feature (Series.name)
     feature : actual values of the features (Series)
@@ -96,14 +97,15 @@ class FeatureData():
         self.count = float(self.count)
     
     def __min_feature(self):
-        self.min = self.feature[0]
+        self.min = self.feature[self.feature.first_valid_index()]
     
     def __max_feature(self):
         self.max = self.feature[self.feature.last_valid_index()]
 
     def __std_feature(self):
         """
-        https://stackoverflow.com/questions/25695986/pandas-why-pandas-series-std-is-different-from-numpy-std/25696030
+        std = sqrt(mean(x)), where x = abs(a - a.mean())**2
+        https://numpy.org/doc/stable/reference/generated/numpy.std.html
         """
         deviations = [(x - self.mean) ** 2 for x in self.feature]
         variance = sum(deviations) / (self.count - 1)
@@ -193,16 +195,22 @@ def filter_dataframe(dataframe):
     filtered_dataframe.pop("Index")
     return (filtered_dataframe)
 
-def describe(dataframe):
-    filtered_dataframe = filter_dataframe(dataframe)
-    sorted_columns = []
-    for column_name in filtered_dataframe:
-        sorted_columns.append(filtered_dataframe[column_name].sort_values())
+def parse_arguments():  
+    parser = ArgumentParser()
+    parser.add_argument("-f",
+        dest="filename",
+        help="Filename of the dataset CSV file",
+        required=True)
+    return parser.parse_args()
 
-df = pandas.read_csv("./dataset_train.csv")
-filtered_df = filter_dataframe(df)
-lst = []
-lst.append([
+
+def main():
+    args = parse_arguments()
+
+    df = pandas.read_csv(args.filename)
+    filtered_df = filter_dataframe(df)
+    lst = []
+    lst.append([
             "name",
             "count",
             "mean",
@@ -216,10 +224,14 @@ lst.append([
             "max"
             ])
 
-for feature in filtered_df:
-    lst.append(FeatureData(filtered_df[feature]).get_data_list())
-for indexes,ft1,ft2,ft3,ft4,ft5,ft6,ft7,ft8,ft9,ft10,ft11,ft12,ft13 in zip(*lst):
-    if (type(ft1) == str):
-        print("{:<5}{:>14.10}{:>14.10}{:>14.10}{:>14.10}{:>14.10}{:>14.10}{:>14.10}{:>14.10}{:>14.10}{:>14.10}{:>14.10}{:>14.10}{:>14.10}".format("",ft1, ft2, ft3, ft4, ft5, ft6, ft7, ft8, ft9, ft10, ft11, ft12, ft13))
-    else:
-        print("{:<5}{:>14.5f}{:>14.5f}{:>14.5f}{:>14.5f}{:>14.5f}{:>14.5f}{:>14.5f}{:>14.5f}{:>14.5f}{:>14.5f}{:>14.5f}{:>14.5f}{:>14.5f}".format(indexes, ft1, ft2, ft3, ft4, ft5, ft6, ft7, ft8, ft9, ft10, ft11, ft12, ft13))
+    for feature in filtered_df:
+        lst.append(FeatureData(filtered_df[feature]).get_data_list())
+    #print(*lst)
+    for indexes,ft1,ft2,ft3,ft4,ft5,ft6,ft7,ft8,ft9,ft10,ft11,ft12,ft13 in zip(*lst):
+        if (type(ft1) == str):
+            print("{:<5}{:>14.10}{:>14.10}{:>14.10}{:>14.10}{:>14.10}{:>14.10}{:>14.10}{:>14.10}{:>14.10}{:>14.10}{:>14.10}{:>14.10}{:>14.10}".format("",ft1, ft2, ft3, ft4, ft5, ft6, ft7, ft8, ft9, ft10, ft11, ft12, ft13))
+        else:
+            print("{:<5}{:>14.5f}{:>14.5f}{:>14.5f}{:>14.5f}{:>14.5f}{:>14.5f}{:>14.5f}{:>14.5f}{:>14.5f}{:>14.5f}{:>14.5f}{:>14.5f}{:>14.5f}".format(indexes, ft1, ft2, ft3, ft4, ft5, ft6, ft7, ft8, ft9, ft10, ft11, ft12, ft13))
+
+
+main()

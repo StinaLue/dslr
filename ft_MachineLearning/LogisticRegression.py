@@ -33,9 +33,9 @@ class LogisticRegression_Model:
         #INT OR FLOAT FOR 0 and 1 ??
         if class_name is not None:
             self.classes = (dataframe[class_name] == class_to_test).astype(int).to_numpy()
+            np.reshape(self.classes, (int(self.nb_entries), 1))
         else:
             self.classes = None
-        np.reshape(self.classes, (int(self.nb_entries), 1))
         self.features = {}
         for i in range(len(self.features_selected)):
             self.features[self.features_selected[i]] = self.dataframe[self.features_selected[i]].to_numpy()

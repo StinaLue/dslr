@@ -32,8 +32,9 @@ def parse_arguments():
     parser = ArgumentParser()
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument("-f",
-        dest="filename",
-        help="Filename of the dataset CSV file")
+        metavar=("filename", "weights"),
+        nargs=2,
+        help="Filename of the dataset CSV file and of the weights CSV file")
     group.add_argument("-me",
         action="store_true",
         help="Ask for prediction of house for your own data")
@@ -62,7 +63,7 @@ def get_infos():
     name = input("Please enter your name : ")
     column_values.append(name)
     while not int(astro) in range(0,11):
-        astro = input("Please enter Astro between 0 - 10 : ")
+        astro = input("Please enter Astro between (0 - 10) : ")
     astro = other_calculate_grade(int(astro), -966.74055, 1016.21194)
     column_values.append(astro)
     while not int(herbo) in range(0,11):
@@ -92,6 +93,28 @@ def create_house_model(filename, modelname, scaled_features, features_selected):
     probabilites = modelname.predict_proba(scaled_features, features_coeffs, intercept)
     return(probabilites)
 
+def get_all_probas(weightsfile, scaled_features, features_selected):
+    df = pd.read_csv(weightsfile)
+    intercept_g = np.array([df["Intercept"][0]], dtype=float)
+    intercept_h = np.array([df["Intercept"][2]], dtype=float)
+    intercept_r = np.array([df["Intercept"][4]], dtype=float)
+    intercept_s = np.array([df["Intercept"][6]], dtype=float)
+    features_coeffs_g = np.zeros((len(features_selected), 1))
+    features_coeffs_h = np.zeros((len(features_selected), 1))
+    features_coeffs_r = np.zeros((len(features_selected), 1))
+    features_coeffs_s = np.zeros((len(features_selected), 1))
+    for i, column in enumerate(df.columns[1:]):
+        features_coeffs_g[i] = df[column][0]
+        features_coeffs_h[i] = df[column][2]
+        features_coeffs_r[i] = df[column][4]
+        features_coeffs_s[i] = df[column][6]
+    model = LogisticRegression_Model(df, features_selected)
+    probabilities_g = model.predict_proba(scaled_features, features_coeffs_g, intercept_g)
+    probabilities_h = model.predict_proba(scaled_features, features_coeffs_h, intercept_h)
+    probabilities_r = model.predict_proba(scaled_features, features_coeffs_r, intercept_r)
+    probabilities_s = model.predict_proba(scaled_features, features_coeffs_s, intercept_s)
+    return probabilities_g, probabilities_h, probabilities_r, probabilities_s
+
 def sortinghat(testdata, args):
     features_selected = ["Astronomy", "Herbology", "Charms", "Ancient Runes"]
     if args.me:
@@ -103,13 +126,19 @@ def sortinghat(testdata, args):
     if not os.path.exists("gryffindor_weights.csv"):
         print("You have to train your model before predicting")
         exit()
-    probabilites_g = create_house_model("gryffindor_weights.csv", "Gryffindor", scaled_features, features_selected)
-    probabilites_s = create_house_model("slytherin_weights.csv", "Slytherin", scaled_features, features_selected)
-    probabilites_h = create_house_model("hufflepuff_weights.csv", "Hufflepuff", scaled_features, features_selected)
-    probabilites_r = create_house_model("ravenclaw_weights.csv", "Ravenclaw", scaled_features, features_selected)
+    """
+    probabilities_g = create_house_model("gryffindor_weights.csv", "Gryffindor", scaled_features, features_selected)
+    probabilities_s = create_house_model("slytherin_weights.csv", "Slytherin", scaled_features, features_selected)
+    probabilities_h = create_house_model("hufflepuff_weights.csv", "Hufflepuff", scaled_features, features_selected)
+    probabilities_r = create_house_model("ravenclaw_weights.csv", "Ravenclaw", scaled_features, features_selected)
+    """
+    if args.me:
+        probabilities_g, probabilities_h, probabilities_r, probabilities_s = get_all_probas("weights.csv", scaled_features, features_selected) 
+    else:
+        probabilities_g, probabilities_h, probabilities_r, probabilities_s = get_all_probas(args.f[1], scaled_features, features_selected) 
 
     rows = []
-    for firstname, proba_G, proba_S, proba_H, proba_R in zip(firstnames, probabilites_g, probabilites_s, probabilites_h, probabilites_r):
+    for firstname, proba_G, proba_S, proba_H, proba_R in zip(firstnames, probabilities_g, probabilities_s, probabilities_h, probabilities_r):
         if args.me:
             print("Hmmmm, " + str(firstname) + "... interesting... ", end="")
         proba_tab = [proba_G, proba_S, proba_H, proba_R]
@@ -154,8 +183,10 @@ def sortinghat(testdata, args):
 def main():
     args = parse_arguments()
     if args.me:
-        args.filename = get_infos()
-    df = read_csv(args.filename)
+        me_filename = get_infos()
+        df = read_csv(me_filename)
+    else:
+        df = read_csv(args.f[0])
     df = preprocess_dataframe(df)
     sortinghat(df, args)
 

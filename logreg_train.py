@@ -60,4 +60,10 @@ def main():
     Slytherin_Model.train(Slytherin_Model.scaled_features_matrix, Slytherin_Model.classes, 1e-1, 50, 15000, 1e-4)
     Slytherin_Model.save_weights_csv("slytherin_weights.csv")
 
+    filenames = ['gryffindor_weights.csv', 'hufflepuff_weights.csv', 'ravenclaw_weights.csv', 'slytherin_weights.csv']
+    with open('./weights.csv', 'w') as outfile:
+        for fname in filenames:
+            with open(fname) as infile:
+                outfile.write(infile.read())
+
 main()

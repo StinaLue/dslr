@@ -143,7 +143,7 @@ def sortinghat(testdata, args):
     df = pd.DataFrame(rows, columns=["Hogwarts House"])
     df.to_csv("houses.csv", index_label="Index")
 
-    if args.v:
+    if args.v and not args.me:
         color_dict = dict({'Hufflepuff':'gold',
                   'Slytherin':'lime',
                   'Ravenclaw': 'blue',

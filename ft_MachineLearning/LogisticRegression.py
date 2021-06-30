@@ -137,12 +137,6 @@ class LogisticRegression_Model:
         log_odds = np.dot(features, coefficients) + intercept
         results = self.sigmoid(log_odds)
 
-    #def unscale_predictY(self):
-        """
-        Reverses the Z-scaling for our scaled predicted y tab
-        """
-    #    self.predictY = (self.current_scaled_predictY * self.dataframe.std()[self.features[1]]) + self.dataframe.mean()[self.features[1]]
-
     def unscale_thetas(self):
         """
         Unscale theta parameters of the Logistic functions thx to maths --> https://www.mathsisfun.com/algebra/line-equation-2points.html
@@ -153,29 +147,11 @@ class LogisticRegression_Model:
         print (self.intercept)
         print (self.features_coeffs)
 
-    def __plot_result(self):
-        """
-        plots the end result of our training.
-        """
-        try:
-            plt.scatter(self.true_X, self.true_Y)
-            plt.plot(self.true_X, self.predictY, color='red')  # regression line
-            plt.xlabel(self.features[0])
-            plt.ylabel(self.features[1])
-            plt.title(self.filename)
-            plt.show()
-        except KeyboardInterrupt:
-            print("Ctrl-c received. Goodbye !")
-            exit()
-
-
-    #def train(self, features, true_labels, learning_rate, batch_size):
     def train(self, features_matrix, labels_array, learning_rate, batch_size, iterations, tolerance):
         """
         runs the Logistic regression algorithm with all the provided class attributes
         """
         current_error_tmp = 0
-        #precision = 0.00000001
         for i in range(iterations): #stop range if log_loss is nearly the same 2 consecutive times, or range limit is reached
             #self.current_batch = self.select_random_matrix_batch(self.scaled_features_matrix, batch_size)
             current_batchlabels, current_batchfeatures = self.selrand_features_labels(features_matrix, labels_array, batch_size)

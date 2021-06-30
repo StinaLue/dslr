@@ -60,19 +60,4 @@ def main():
     Slytherin_Model.train(Slytherin_Model.scaled_features_matrix, Slytherin_Model.classes, 1e-1, 50, 15000, 1e-4)
     Slytherin_Model.save_weights_csv("slytherin_weights.csv")
 
-
-    #Gryffindor_Model.predict_proba()
-    #print(Gryffindor_Model.features_coeffs)
-    """
-    if args.features is None or args.classname is None or args.valuepredict is None:
-        logmodel = LinearRegression_Model(args.filename, verbose=args.verbose)
-    else:
-        try:
-            features = args.features.split(",")
-            data = LinearRegression_Model(args.filename, xfeature=xfeature, yfeature=yfeature, verbose=args.verbose)
-        except:
-            print("Something went wrong with the features you gave.")
-            exit()
-    """
-
 main()

@@ -107,7 +107,7 @@ class LogisticRegression_Model:
     
     def log_loss(self, predicted_probabilities, actual_class):
         """
-        Caculate the cost of our current sigmoid function through the log-loss formula where:
+        Calculate the cost of our current sigmoid function through the log-loss formula where:
         'm': the number of data samples
         'y(i)': the class of data sample i (ex: Gryffindor(1)/Not Gryffindor(0))
         'z(i)': the log-odds of sample i
@@ -136,16 +136,6 @@ class LogisticRegression_Model:
     def __logistic_function(self, features, coefficients, intercept):
         log_odds = np.dot(features, coefficients) + intercept
         results = self.sigmoid(log_odds)
-
-    def unscale_thetas(self):
-        """
-        Unscale theta parameters of the Logistic functions thx to maths --> https://www.mathsisfun.com/algebra/line-equation-2points.html
-        """
-        self.features_coeffs = (self.predictY[0] - self.predictY[1]) / (self.true_X[0] - self.true_X[1])
-        for i in self.features_coeffs:
-            self.intercept = (self.features_coeffs[i] * 0) - (self.features_coeffs[i] * self.true_X[0]) + self.predictY[0]
-        print (self.intercept)
-        print (self.features_coeffs)
 
     def train(self, features_matrix, labels_array, learning_rate, batch_size, iterations, tolerance):
         """
@@ -180,23 +170,3 @@ class LogisticRegression_Model:
         column_values = np.insert(features_coeffs, 0, self.intercept, axis=1)
         csv_df = pd.DataFrame(column_values, columns=column_names)
         csv_df.to_csv(filename, index=False)
-
-if __name__ == "__main__":
-    from argparse import ArgumentParser
-    def parse_arguments():  
-        parser = ArgumentParser()
-        parser.add_argument("-f",
-            dest="filename",
-            help="add csv flag",
-            required=True)
-        parser.add_argument("-v", "--verbose",
-            action="store_true",
-            dest="verbose",
-            default=False,
-            help="Give a verbose output of the Logistic regression training")
-        return parser.parse_args()
-    def main():
-        args = parse_arguments()
-        data = LogisticRegression_Model(args.filename, verbose=args.verbose)
-
-    main()

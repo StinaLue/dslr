@@ -31,10 +31,6 @@ def parse_arguments():
         dest="filename",
         help="Filename of the dataset CSV file",
         required=True)
-    parser.add_argument("--classname",
-        dest="classname",
-        default=None,
-        help="Name of the class category that we try to predict")
     return parser.parse_args()
 
 
@@ -45,19 +41,19 @@ def main():
     hogwarts_df = preprocess_dataframe(hogwarts_df)
     features_selected = ["Astronomy", "Herbology", "Charms", "Ancient Runes"]
     Gryffindor_Model = LogisticRegression_Model(hogwarts_df, features_selected, "Hogwarts House", "Gryffindor")
-    Gryffindor_Model.train(Gryffindor_Model.scaled_features_matrix, Gryffindor_Model.classes, 1e-1, 50, 15000, 1e-4)
+    Gryffindor_Model.train(Gryffindor_Model.scaled_features_matrix, Gryffindor_Model.real_labels, 1e-1, 50, 15000, 1e-4)
     Gryffindor_Model.save_weights_csv("gryffindor_weights.csv")
 
     Hufflepuff_Model = LogisticRegression_Model(hogwarts_df, features_selected, "Hogwarts House", "Hufflepuff")
-    Hufflepuff_Model.train(Hufflepuff_Model.scaled_features_matrix, Hufflepuff_Model.classes, 1e-1, 50, 15000, 1e-4)
+    Hufflepuff_Model.train(Hufflepuff_Model.scaled_features_matrix, Hufflepuff_Model.real_labels, 1e-1, 50, 15000, 1e-4)
     Hufflepuff_Model.save_weights_csv("hufflepuff_weights.csv")
 
     Ravenclaw_Model = LogisticRegression_Model(hogwarts_df, features_selected, "Hogwarts House", "Ravenclaw")
-    Ravenclaw_Model.train(Ravenclaw_Model.scaled_features_matrix, Ravenclaw_Model.classes, 1e-1, 50, 15000, 1e-4)
+    Ravenclaw_Model.train(Ravenclaw_Model.scaled_features_matrix, Ravenclaw_Model.real_labels, 1e-1, 50, 15000, 1e-4)
     Ravenclaw_Model.save_weights_csv("ravenclaw_weights.csv")
     
     Slytherin_Model = LogisticRegression_Model(hogwarts_df, features_selected, "Hogwarts House", "Slytherin")
-    Slytherin_Model.train(Slytherin_Model.scaled_features_matrix, Slytherin_Model.classes, 1e-1, 50, 15000, 1e-4)
+    Slytherin_Model.train(Slytherin_Model.scaled_features_matrix, Slytherin_Model.real_labels, 1e-1, 50, 15000, 1e-4)
     Slytherin_Model.save_weights_csv("slytherin_weights.csv")
 
     filenames = ['gryffindor_weights.csv', 'hufflepuff_weights.csv', 'ravenclaw_weights.csv', 'slytherin_weights.csv']

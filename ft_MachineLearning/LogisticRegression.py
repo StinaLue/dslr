@@ -10,18 +10,18 @@ class LogisticRegression_Model:
 
     How it works:
     1. init all features coeffs and intercept to 0 
-    2. mutiply each feature coeff by its feature to get log-odds (probability)
+    2. mutiply each feature coeff by its feature and add intercept to get log-odds (probability)
     3. scale the log-odds by mapping them to the our logistic function --> the sigmoid function, giving us a probability in the range (0,1)
     4. calculate the partial derivative of the log-loss of our current logistic function
     5. use the partial derivative to update our intercept and our features coefficients (gradient descent)
     6. run the gradient descent until we reach the best minimum (change the learning rate if needed)
     """
-    def __init__(self, dataframe, features_selected, class_name=None, class_to_test=None):
+    def __init__(self, dataframe, features_selected, class_title=None, class_to_test=None):
         """
-        filename: CSV file containing the data
-        xfeature: name of the feature for the x axis
-        yfeature: name of the feature for the y axis
-        verbose: boolean --> plot during training or not
+        dataframe: df to use to train or predict
+        features_selected: list of features used to train or predict (shape: ["feature1", "feature2"])
+        class_title: title for the class to test --> only for training
+        class_to_test: specific class that we want to predict (one vs all style) --> only for training
         """
         self.dataframe = dataframe
         self.scaled_dataframe = (self.dataframe - self.dataframe.mean()) / self.dataframe.std()
@@ -29,13 +29,12 @@ class LogisticRegression_Model:
         self.features_selected = features_selected
         self.features_coeffs = np.zeros((len(features_selected), 1))
         self.intercept = np.zeros(1)
-        self.scaled_intercept = np.zeros(1)
-        #INT OR FLOAT FOR 0 and 1 ??
-        if class_name is not None:
-            self.classes = (dataframe[class_name] == class_to_test).astype(int).to_numpy()
-            np.reshape(self.classes, (int(self.nb_entries), 1))
+        if class_title is not None:
+            #get labels in array as 0s and 1s for each entry of our class if the entry == class_to_test
+            self.real_labels = (dataframe[class_title] == class_to_test).astype(int).to_numpy()
+            np.reshape(self.real_labels, (int(self.nb_entries), 1))
         else:
-            self.classes = None
+            self.real_labels = None
         self.features = {}
         for i in range(len(self.features_selected)):
             self.features[self.features_selected[i]] = self.dataframe[self.features_selected[i]].to_numpy()
@@ -45,20 +44,6 @@ class LogisticRegression_Model:
 
         self.features_matrix = dataframe[features_selected].to_numpy()
         self.scaled_features_matrix = self.scaled_dataframe[features_selected].to_numpy()
-
-        self.dict_feat_label = {"Features":self.scaled_features_matrix, "Labels":self.classes}
-
-    def select_random_matrix_batch(self, features_matrix, batch_size):
-        """
-        features_matrix: numpy 2D array
-        batch_size: number of random rows in the new numpy 2D array
-
-        selects batch_size of random rows inside the 2D numpy array features_matrix
-        returns the 2D numpy array batch
-        Very useful for Stochastic (for batch size == 1) or Batch Gradient Descent
-        """
-        new_random_batch = features_matrix[np.random.choice(features_matrix.shape[0], batch_size, replace=False)]
-        return new_random_batch
 
     def selrand_features_labels(self, features_matrix, labels_array, batch_size):
         """
@@ -133,23 +118,17 @@ class LogisticRegression_Model:
         probabilities = self.sigmoid(calculated_log_odds)
         return probabilities
 
-    def __logistic_function(self, features, coefficients, intercept):
-        log_odds = np.dot(features, coefficients) + intercept
-        results = self.sigmoid(log_odds)
-
     def train(self, features_matrix, labels_array, learning_rate, batch_size, iterations, tolerance):
         """
         runs the Logistic regression algorithm with all the provided class attributes
         """
-        current_error_tmp = 0
-        for i in range(iterations): #stop range if log_loss is nearly the same 2 consecutive times, or range limit is reached
-            #self.current_batch = self.select_random_matrix_batch(self.scaled_features_matrix, batch_size)
+        for i in range(iterations): #stop range if update is small enough (tolerance), or range limit is reached (iterations)
             current_batchlabels, current_batchfeatures = self.selrand_features_labels(features_matrix, labels_array, batch_size)
-            #current_predictproba = self.predict_proba(self.current_batch, self.scaled_features_coeffs, self.intercept)
             current_predictproba = self.predict_proba(current_batchfeatures, self.features_coeffs, self.intercept)
             #partial deriv wrt intercept (tmpθ0) = ratioDApprentissage ∗ 1/m (m−1∑i=0)(predicted_proba(i) - real_class(i))
             intercept_tmp = learning_rate * (1/batch_size) * np.sum(current_predictproba - current_batchlabels)
             features_gradient_tmp = []
+            #modify the shape of the features np array to work with np dot
             transposed_features = np.transpose(current_batchfeatures)
             #partial deriv wrt featurecoeff (tmpθj) = ratioDApprentissage ∗ 1/m (m−1∑i=0)(predicted_proba(i) - real_class(i)) * feature_j_value(i)
             for j in range(current_batchfeatures.shape[1]):

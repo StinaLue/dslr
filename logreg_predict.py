@@ -63,19 +63,19 @@ def get_infos():
     name = input("Please enter your name : ")
     column_values.append(name)
     while not int(astro) in range(0,11):
-        astro = input("Please enter Astro between (0 - 10) : ")
+        astro = input("Please enter your Astronomy grade on a range from 0 to 10 : ")
     astro = other_calculate_grade(int(astro), -966.74055, 1016.21194)
     column_values.append(astro)
     while not int(herbo) in range(0,11):
-        herbo = input("Please enter Herbo between (0 - 10) : ")
+        herbo = input("Please enter your Herbology grade on a range from 0 to 10 : ")
     herbo = other_calculate_grade(int(herbo), -10.29566, 11.61290)
     column_values.append(herbo)
     while not int(charms) in range(0,11):
-        charms = input("Please enter Charms between (0 - 10) : ")
+        charms = input("Please enter your Charms grade on a range from 0 to 10 : ")
     charms = other_calculate_grade(int(charms), -261.04892, -225.42814)
     column_values.append(charms)
     while not int(runes) in range(0,11):
-        runes = input("Please enter Runes between (0 - 10) : ")
+        runes = input("Please enter your Ancient Runes grade on a range from 0 to 10 : ")
     runes = other_calculate_grade(int(runes), 283.86961, 745.39622)
     column_values.append(runes)
     csv.append(column_values)
